@@ -11,6 +11,7 @@ use std::fs::File;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::io::Write;
+use std::vec::Vec;
 
 use indexmap::map::IndexMap;
 
@@ -80,70 +81,15 @@ fn build_list(file: &str, this: &Rc<RefCell<Window>>) {
 
         custom_constants_page.constants.insert(latex.clone(), (name.clone(), utf8.clone(), value.clone()));
 
-        /*let row = ActionRow::builder()
-            .activatable(true)
-            .title(format!("{} = {}", utf8, value))
-            .subtitle(name)
-            .build();
-
-        let copy_symbol = Image::from_icon_name("edit-copy-symbolic");
-
-        let remove_button_content = ButtonContent::builder()
-            .icon_name("user-trash-symbolic")
-            .build();
-        let remove_button = Button::builder()
-            .child(&remove_button_content)
-            .build();
-        let remove_button_style = remove_button.style_context();
-        remove_button_style.add_class("destructive-action");*/
-        
         drop(custom_constants_page);
         drop(content);
         drop(window);
 
         let row = create_const_row(&Rc::clone(&this), &latex, &utf8, &name, &value);
         
-        /*let this_clone = Rc::clone(this);
-
-        let latex_clone = latex.clone();
-        remove_button.connect_clicked(move |_| {
-            let window_clone = this_clone.borrow();
-            let content_clone = window_clone.content.borrow();
-            let mut custom_constants_page_clone = content_clone.custom_constants_page.borrow_mut();
-
-            custom_constants_page_clone.constants.shift_remove(&latex_clone);
-
-            let custom_constants_page_ref = Rc::clone(&content_clone.custom_constants_page);
-
-            drop(custom_constants_page_clone);
-            drop(content_clone);
-            drop(window_clone);
-
-            rebuild_list(&this_clone);
-            save_constants(&custom_constants_page_ref);
-        });*/
-
         let window = this.borrow();
         let content = window.content.borrow();
         let custom_constants_page = content.custom_constants_page.borrow();
-
-        /*let end_buttons = Box::builder()
-            .orientation(Orientation::Horizontal)
-            .spacing(16)
-            .margin_top(8)
-            .margin_bottom(8)
-            .build();
-        end_buttons.append(&copy_symbol);
-        end_buttons.append(&remove_button);
-
-        row.add_suffix(&end_buttons);
-
-        let latex_clone = latex.clone();
-        row.connect_activated(move |_| {
-            let display = Display::default().expect("no display found");
-            let clipboard = display.clipboard();
-            clipboard.set_text(&latex_clone);
-        });*/
 
         custom_constants_page.list.append(&row);
 
@@ -164,8 +110,6 @@ fn build_list(file: &str, this: &Rc<RefCell<Window>>) {
 }
 
 fn create_const_row(this: &Rc<RefCell<Window>>, latex: &str, utf8: &str, name: &str, value: &f64) -> ActionRow {
-    /*let window = this.borrow();
-    let content = window.content.borrow();*/
 
     let row = ActionRow::builder()
         .activatable(true)
@@ -390,38 +334,35 @@ fn confirm_action(dialog: &Dialog, name_field: &EntryRow, latex_field: &EntryRow
 }
 
 fn rebuild_list(this: &Rc<RefCell<Window>>) {
-    let window = this.borrow();
-    let content = window.content.borrow();
-    let custom_constants_page = content.custom_constants_page.borrow();
 
-    let latex_symbols = custom_constants_page.constants.keys();
+    let constants: Vec<(String, String, String, f64)> = {
+        let window = this.borrow();
+        let content = window.content.borrow();
+        let custom_constants_page = content.custom_constants_page.borrow();
 
-    while let Some(child) = custom_constants_page.list.first_child() {
-        custom_constants_page.list.remove(&child);
+        while let Some(child) = custom_constants_page.list.first_child() {
+            custom_constants_page.list.remove(&child);
+        }
+
+        custom_constants_page.constants.iter()
+            .map(|(latex, (name, display, value))| (latex.clone(), name.clone(), display.clone(), value.clone()))
+            .collect()
+    };
+
+    let rows: Vec<ActionRow> = constants.into_iter()
+        .map(|(latex, name, display, value)| create_const_row(&Rc::clone(&this), &latex, &display, &name, &value))
+        .collect();
+
+    {
+        let window = this.borrow();
+        let content = window.content.borrow();
+        let custom_constants_page = content.custom_constants_page.borrow();
+
+        for row in rows {
+            custom_constants_page.list.append(&row);
+        }
     }
-
-    for latex in latex_symbols {
-        let (name, utf8, value) = custom_constants_page.constants.get(latex).unwrap();
-        let latex = latex.clone();
-
-        let row = ActionRow::builder()
-            .activatable(true)
-            .title(format!("{} = {}", utf8, value))
-            .subtitle(name)
-            .build();
-
-        let copy_symbol = Image::from_icon_name("edit-copy-symbolic");
-        row.add_suffix(&copy_symbol);
-
-        row.connect_activated(move |_| {
-            let display = Display::default().expect("no display found");
-            let clipboard = display.clipboard();
-            clipboard.set_text(&latex);
-        });
-
-        custom_constants_page.list.append(&row);
-    }
-
+ 
     let add_button = ButtonRow::builder()
         .activatable(true)
         .title("Add constant")
@@ -429,10 +370,6 @@ fn rebuild_list(this: &Rc<RefCell<Window>>) {
         .build();
 
     let this_clone = Rc::clone(this);
-
-    drop(custom_constants_page);
-    drop(content);
-    drop(window);
 
     add_button.connect_activated(move |_| {
         open_const_creation_dialog(&this_clone);

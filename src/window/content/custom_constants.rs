@@ -70,11 +70,9 @@ fn import_list(file: &str) -> Vec<(String, String, String, f64)> {
     return constants;
 }
 
-fn get_updated_list(this: &Rc<RefCell<Window>>) -> Vec<(String, String, String, f64)> {
+fn get_updated_list(this: &Rc<RefCell<CustomConstantsPage>>) -> Vec<(String, String, String, f64)> {
     let constants: Vec<(String, String, String, f64)> = {
-        let window = this.borrow();
-        let content = window.content.borrow();
-        let custom_constants_page = content.custom_constants_page.borrow();
+        let custom_constants_page = this.borrow();
 
         while let Some(child) = custom_constants_page.list.first_child() {
             custom_constants_page.list.remove(&child);
@@ -246,10 +244,7 @@ fn create_const_row(this: &Rc<RefCell<Window>>, latex: &str, utf8: &str, name: &
 
         save_constants(&Rc::clone(&content.custom_constants_page));
 
-        drop(content);
-        drop(window);
-
-        let list = get_updated_list(&Rc::clone(&this_clone));
+        let list = get_updated_list(&Rc::clone(&content.custom_constants_page));
         build_list(&list, &this_clone);
     });
 
@@ -348,10 +343,12 @@ fn confirm_action(dialog: &Dialog, name_field: &EntryRow, latex_field: &EntryRow
 
         drop(default_constant_page);
         drop(custom_constants_page);
+
+        let list = get_updated_list(&Rc::clone(&content.custom_constants_page));
+
         drop(content);
         drop(window);
-
-        let list = get_updated_list(&Rc::clone(&this));
+ 
         build_list(&list, &this);
         save_constants(&custom_constants_page_clone);
 
@@ -377,4 +374,40 @@ fn save_constants(this: &Rc<RefCell<CustomConstantsPage>>) {
 
     let mut file = File::create(CONSTANTS_SAVE_FILE).expect(&format!("Can't create file {CONSTANTS_SAVE_FILE}"));
     let _ = file.write_all(file_content.as_bytes());
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    //use crate::window::window::Window;
+
+    use std::vec::Vec;
+
+    //use adw::Application;
+
+    #[test]
+    fn test_custom_constants_page_new() {
+        let _ = gtk4::init();
+
+        let custom_constants_page_ref = CustomConstantsPage::new();
+        let custom_constants_page = custom_constants_page_ref.borrow();
+
+        let empty_map: IndexMap<String, (String, String, f64)> = IndexMap::new();
+
+        assert_eq!(custom_constants_page.scrolled_list.child(), None);
+        assert_eq!(custom_constants_page.list.row_at_index(0), None);
+        assert_eq!(custom_constants_page.constants, empty_map);
+    }
+
+    #[test]
+    fn test_import_list() {
+        let empty_vec: Vec<(String, String, String, f64)> = Vec::new();
+        assert_eq!(import_list(""), empty_vec);
+
+        let mut filled_vec: Vec<(String, String, String, f64)> = Vec::new();
+        filled_vec.push(("\\e".to_string(), "euler".to_string(), "e".to_string(), 10.0));
+        filled_vec.push(("h".to_string(), "planck".to_string(), "h".to_string(), 5.0));
+        assert_eq!(import_list("e,\\e,10,euler\nh,h,5,planck"), filled_vec);
+    } 
 }

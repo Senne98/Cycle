@@ -1,4 +1,5 @@
 mod window;
+mod parser;
 
 use window::window::Window;
 use window::window as wnd;

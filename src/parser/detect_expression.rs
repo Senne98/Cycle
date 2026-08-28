@@ -1,3 +1,19 @@
+pub trait CharVecAsFloat {
+    fn to_string_if_valid_f64(&self) -> Option<String>;
+}
+
+impl CharVecAsFloat for Vec<char> {
+    fn to_string_if_valid_f64(&self) -> Option<String> {
+        let text: String = self.into_iter().collect();
+        if text.parse::<f64>().is_err() {
+            return None;
+        }
+
+        return Some(text);
+    }
+}
+
+
 /*
 *   DETECT EXPRESSIONS ON THE LEFT SIDE OF A STRING
 */
@@ -28,20 +44,25 @@ pub fn detect_expression_left(input: String) -> Option<String> {
 fn number_left(input: String) -> Option<String> {
     let mut input_chars = input.chars();
     let mut expression: Vec<char> = Vec::new();
+
     expression.push(input_chars.next().unwrap());
-    let mut current_char = input_chars.next().unwrap();
+
+    let current_char_wraped = input_chars.next();
+    if current_char_wraped == None {
+        return expression.to_string_if_valid_f64();
+    }
+    let mut current_char = current_char_wraped.unwrap();
 
     while vec!['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.'].contains(&current_char) {
         expression.push(current_char);
-        current_char = input_chars.next().unwrap();
+        let current_char_wraped = input_chars.next();
+        if current_char_wraped == None {
+            break;
+        }
+        current_char = current_char_wraped.unwrap();
     }
 
-    let full_expression: String = expression.into_iter().collect();
-    if full_expression.parse::<f64>().is_err() {
-        return None;
-    }
-
-    return Some(full_expression);
+    return expression.to_string_if_valid_f64();
 }
 
 fn braces_left(input: String) -> Option<String> {
@@ -86,6 +107,7 @@ mod tests {
     fn test() {
     }
 
+    #[test]
     fn test_number_left() {
         assert_eq!(number_left("10.0".to_string()), Some("10.0".to_string()));
         assert_eq!(number_left("1".to_string()), Some("1".to_string()));

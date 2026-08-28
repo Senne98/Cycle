@@ -73,14 +73,19 @@ fn braces_left(input: String) -> Option<String> {
 
     let mut current_char: char;
 
-    while opened_braces > 1 {
-        current_char = input_chars.next().unwrap();
+    while opened_braces > 0 {
+        let current_char_wraped =  input_chars.next();
+        if current_char_wraped == None {
+            return None;
+        }
+        current_char = current_char_wraped.unwrap();
+
         match current_char {
             '(' => opened_braces += 1,
             ')' => opened_braces -= 1,
-            _ => break,
+            _ => (),
         };
-        expression.push(input_chars.next().unwrap());
+        expression.push(current_char);
     }
 
     return Some(expression.into_iter().collect());
@@ -125,4 +130,16 @@ mod tests {
         assert_eq!(number_left("10.0\\".to_string()), Some("10.0".to_string()));
         assert_eq!(number_left("1.0.0".to_string()), None);
     }
+
+    #[test]
+    fn test_braces_left() {
+        assert_eq!(braces_left("(10 * 5)".to_string()), Some("(10 * 5)".to_string()));
+        assert_eq!(braces_left("(10 * 5) + 3".to_string()), Some("(10 * 5)".to_string()));
+        assert_eq!(braces_left("(10 * 5)\\latex".to_string()), Some("(10 * 5)".to_string()));
+        assert_eq!(braces_left("(10 * (5))".to_string()), Some("(10 * (5))".to_string()));
+        assert_eq!(braces_left("(10 * (3 + 5 -10.5)) + (8*3)".to_string()), Some("(10 * (3 + 5 -10.5))".to_string()));
+        assert_eq!(braces_left("(1 + 3 + (5) ".to_string()), None);
+        assert_eq!(braces_left("(".to_string()), None);
+    }
+
 }

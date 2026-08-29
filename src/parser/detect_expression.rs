@@ -44,11 +44,13 @@ pub fn detect_expression_left(input: String) -> Option<String> {
         first_char = input_chars.next().unwrap();
     }
 
+    let unpadded_input = input.strip_prefix(&left_padding).unwrap().to_string();
+
     let expression = match first_char {
-        '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '.' | '-' => number_left(input),
-        '(' => braces_left(input),
-        '\\' => latex_variable_left(input),
-        _ => check_operators_left(input),
+        '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '.' | '-' => number_left(unpadded_input),
+        '(' => braces_left(unpadded_input),
+        '\\' => latex_variable_left(unpadded_input),
+        _ => check_operators_left(unpadded_input),
     };
 
     if expression == None {
@@ -264,7 +266,55 @@ fn check_operators_left(input: String) -> Option<String> {
 
 
 pub fn detect_expression_right(input: String) -> Option<String> {
-    return Some("".to_string());
+    let mut input_chars = input.chars();
+    let mut first_char = input_chars.next_back().unwrap();
+    let mut right_padding = "".to_string();
+
+    while first_char == ' ' {
+        right_padding.push_str(" ");
+        first_char = input_chars.next_back().unwrap();
+    }
+
+    let unpadded_input = input.strip_suffix(&right_padding).unwrap().to_string();
+
+    let normalized = unpadded_input.replace("- ", "\u{0}");
+    let mut iter = normalized.split(|c| {c == '\u{0}' || c == '+' || c == '*' || c == '/' || c == '^'});
+
+    let mut last = iter.next_back();
+    if last.is_none() {
+        return None;
+    }
+    let mut expression: String = last.unwrap().to_string();
+    let test_expr = detect_expression_left(expression.clone());
+
+    if !test_expr.is_none() && test_expr.unwrap() == expression {
+        return Some(expression + &right_padding);
+    }
+
+    last = iter.next_back();
+        
+    while last != None {
+        let old_expression = expression.clone();
+        expression = last.unwrap().to_string();
+
+        let operator = unpadded_input.clone().strip_suffix(&old_expression.clone()).unwrap().chars().last().unwrap();
+        if operator == ' ' {
+            expression.push_str("- ");
+        } else {
+            expression.push(operator);
+        }
+
+        expression.push_str(&old_expression);
+
+        let test_expr = detect_expression_left(expression.clone());
+        if !test_expr.is_none() && test_expr.unwrap() == expression {
+            return Some(expression + &right_padding);
+        }
+
+        last = iter.next_back();
+    }
+
+    return None;
 }
 
 #[cfg(test)]
@@ -315,7 +365,7 @@ mod tests {
 
     #[test]
     fn test_detect_expression_left() {
-        assert_eq!(detect_expression_left("10.0".to_string()), Some("10.0".to_string()));
+        assert_eq!(detect_expression_left(" 10.0".to_string()), Some(" 10.0".to_string()));
         assert_eq!(detect_expression_left("-10.0".to_string()), Some("-10.0".to_string()));
         assert_eq!(detect_expression_left("(5 * 10 + 3)".to_string()), Some("(5 * 10 + 3)".to_string()));
         assert_eq!(detect_expression_left("\\test_{5}".to_string()), Some("\\test_{5}".to_string()));
@@ -429,5 +479,17 @@ mod tests {
         
         //general false
         assert_eq!(check_operators_left("test".to_string()), None);
+    }
+
+    #[test]
+    fn test_detect_expression_right() {
+        //assert_eq!(detect_expression_right("(10 * 5)".to_string()), Some("(10 * 5)".to_string()));
+        assert_eq!(detect_expression_right("(10 * 5) + 3".to_string()), Some(" 3".to_string()));
+        assert_eq!(detect_expression_right("(10 * 5) + \\latex ".to_string()), Some(" \\latex ".to_string()));
+        assert_eq!(detect_expression_right("(10 * (5))".to_string()), Some("(10 * (5))".to_string()));
+        assert_eq!(detect_expression_right("(10 * (3 + 5 -10.5)) + (8*3)".to_string()), Some(" (8*3)".to_string()));
+        assert_eq!(detect_expression_right("1+ sqrt(5)".to_string()), Some(" sqrt(5)".to_string()));
+        assert_eq!(detect_expression_right("(".to_string()), None);
+
     }
 }

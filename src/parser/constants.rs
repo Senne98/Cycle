@@ -58,6 +58,13 @@ pub fn get_value_as_f64(latex: &str) -> Option<f64> {
     return CUSTOM_CONSTANTS.lock().unwrap().get_value_as_f64(latex);
 }
 
+pub fn is_constant(latex: &str) -> bool {
+    if DEFAULT_CONSTANTS.lock().unwrap().contains_key(latex) {
+        return true;
+    }
+    return CUSTOM_CONSTANTS.lock().unwrap().contains_key(latex);
+}
+
 // Load constants from disk
 
 const DEFAULT_CONSTANTS_FILE: &str = "rescources/default_constants.csv";

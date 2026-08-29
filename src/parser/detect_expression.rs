@@ -48,7 +48,7 @@ pub fn detect_expression_left(input: String) -> Option<String> {
         '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '.' | '-' => number_left(input),
         '(' => braces_left(input),
         '\\' => latex_variable_left(input),
-        _ => return None,
+        _ => check_operators_left(input),
     };
 
     if expression == None {
@@ -166,18 +166,17 @@ fn latex_variable_left(input: String) -> Option<String> {
     }
     let script = &script.unwrap();
 
-    trimmed_input = trimmed_input.strip_prefix(script).unwrap().to_string();
     expression.push_str(script);
 
     return Some(expression);
 }
 
-fn latex_variable_left_name(input: String) -> Option<String> {
+fn latex_variable_left_name(input: String) -> Option<String> { 
     let mut input_chars = input.chars();
     let mut expression: Vec<char> = Vec::new();
 
     let current_char_wraped = input_chars.next();
-    if current_char_wraped == None {
+    if current_char_wraped == None || !current_char_wraped.unwrap().is_letter() {
         return None;
     }
     let mut current_char = current_char_wraped.unwrap();
@@ -227,6 +226,37 @@ fn latex_variable_left_script(input: String) -> Option<String> {
     return Some(expression.to_string());
 }
 
+//checks for operators such as sqrt, or single char variable
+fn check_operators_left(input: String) -> Option<String> {
+    let mut input_chars = input.chars();
+
+    let current_char_wraped = input_chars.next();
+    if current_char_wraped.is_none() {
+        return None;
+    }
+
+    let first_char = current_char_wraped.unwrap();
+    if !first_char.is_letter() {
+        return None;
+    }
+
+    let current_char_wraped = input_chars.next();
+    if current_char_wraped.is_none() || current_char_wraped.unwrap() == ' ' {
+        return Some(first_char.to_string());
+    }
+    
+    if input.starts_with("sqrt(") {
+        let expression = braces_left(input.strip_prefix("sqrt").unwrap().to_string());
+        if expression.is_none() {
+            return None;
+        }
+        let mut result = "sqrt".to_string();
+        result.push_str(&expression.unwrap());
+        return Some(result);
+    }
+
+    return None;
+}
 
 /*
 *   DETECT EXPRESSIONS ON THE RIGHT SIDE OF A STRING
@@ -284,7 +314,21 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test() {
+    fn test_detect_expression_left() {
+        assert_eq!(detect_expression_left("10.0".to_string()), Some("10.0".to_string()));
+        assert_eq!(detect_expression_left("-10.0".to_string()), Some("-10.0".to_string()));
+        assert_eq!(detect_expression_left("(5 * 10 + 3)".to_string()), Some("(5 * 10 + 3)".to_string()));
+        assert_eq!(detect_expression_left("\\test_{5}".to_string()), Some("\\test_{5}".to_string()));
+
+        assert_eq!(detect_expression_left("10.0 + (5 * \\test)".to_string()), Some("10.0".to_string()));
+        assert_eq!(detect_expression_left("-10.0 * sqrt(5)".to_string()), Some("-10.0".to_string()));
+        assert_eq!(detect_expression_left("(5 * 10 + 3) - 1.3".to_string()), Some("(5 * 10 + 3)".to_string()));
+        assert_eq!(detect_expression_left("\\test_{5} + 2".to_string()), Some("\\test_{5}".to_string()));
+
+        assert_eq!(detect_expression_left("1.0. + 2".to_string()), None);
+        assert_eq!(detect_expression_left("\\01 + (5 * 10)".to_string()), None);
+        assert_eq!(detect_expression_left("sqrt(10 + (1 -3)".to_string()), None);
+        assert_eq!(detect_expression_left(". + a + 10".to_string()), None);
     }
 
     #[test]
@@ -347,6 +391,8 @@ mod tests {
         assert_eq!(latex_variable_left_name("abcd0123".to_string()), Some("abcd".to_string()));
         assert_eq!(latex_variable_left_name("abcd.".to_string()), Some("abcd".to_string()));
         assert_eq!(latex_variable_left_name("".to_string()), None);
+        assert_eq!(latex_variable_left_name("01a".to_string()), None);
+        assert_eq!(latex_variable_left_name(".a".to_string()), None);
     }
 
     #[test]
@@ -362,4 +408,26 @@ mod tests {
         assert_eq!(latex_variable_left_script("{a1b2c3.}".to_string()), None);
     }
 
+    #[test]
+    fn test_check_operators_left() {
+        // single char variable
+        assert_eq!(check_operators_left("a".to_string()), Some("a".to_string()));
+        assert_eq!(check_operators_left("A".to_string()), Some("A".to_string()));
+        assert_eq!(check_operators_left("a ".to_string()), Some("a".to_string()));
+        assert_eq!(check_operators_left("A ".to_string()), Some("A".to_string()));
+        assert_eq!(check_operators_left("a abc".to_string()), Some("a".to_string()));
+        assert_eq!(check_operators_left("A abc".to_string()), Some("A".to_string()));
+        assert_eq!(check_operators_left(".aaz ".to_string()), None);
+        assert_eq!(check_operators_left("011245a ".to_string()), None);
+
+        //sqrt
+        assert_eq!(check_operators_left("sqrt()".to_string()), Some("sqrt()".to_string()));
+        assert_eq!(check_operators_left("sqrt(10 * 5)".to_string()), Some("sqrt(10 * 5)".to_string()));
+        assert_eq!(check_operators_left("sqrt(5)abcd ".to_string()), Some("sqrt(5)".to_string()));
+        assert_eq!(check_operators_left("sqrt(( 10)".to_string()), None);
+        assert_eq!(check_operators_left("sqrt".to_string()), None);
+        
+        //general false
+        assert_eq!(check_operators_left("test".to_string()), None);
+    }
 }

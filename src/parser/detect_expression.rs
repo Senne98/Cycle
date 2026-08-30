@@ -36,13 +36,17 @@ impl CharIsLetter for char {
 
 pub fn detect_expression_left(input: String) -> Option<String> {
     let mut input_chars = input.chars();
-    let mut first_char = input_chars.next().unwrap();
+    let mut first_char = input_chars.next();
     let mut left_padding = "".to_string();
 
-    while first_char == ' ' {
+    while first_char == Some(' ') {
         left_padding.push_str(" ");
-        first_char = input_chars.next().unwrap();
+        first_char = input_chars.next();
     }
+
+    let Some(first_char) = first_char else {
+        return Some(left_padding);
+    };
 
     let unpadded_input = input.strip_prefix(&left_padding).unwrap().to_string();
 
@@ -267,18 +271,22 @@ fn check_operators_left(input: String) -> Option<String> {
 
 pub fn detect_expression_right(input: String) -> Option<String> {
     let mut input_chars = input.chars();
-    let mut first_char = input_chars.next_back().unwrap();
+    let mut first_char = input_chars.next_back();
     let mut right_padding = "".to_string();
 
-    while first_char == ' ' {
+    while first_char == Some(' ') {
         right_padding.push_str(" ");
-        first_char = input_chars.next_back().unwrap();
+        first_char = input_chars.next_back();
     }
+
+    if first_char.is_none() {
+        return None;
+    };
 
     let unpadded_input = input.strip_suffix(&right_padding).unwrap().to_string();
 
     let normalized = unpadded_input.replace("- ", "\u{0}");
-    let mut iter = normalized.split(|c| {c == '\u{0}' || c == '+' || c == '*' || c == '/' || c == '^'});
+    let mut iter = normalized.split(|c| {c == '\u{0}' || c == '+' || c == '*' || c == '/' || c == '^' || c == '('});
 
     let mut last = iter.next_back();
     if last.is_none() {
@@ -489,7 +497,8 @@ mod tests {
         assert_eq!(detect_expression_right("(10 * (5))".to_string()), Some("(10 * (5))".to_string()));
         assert_eq!(detect_expression_right("(10 * (3 + 5 -10.5)) + (8*3)".to_string()), Some(" (8*3)".to_string()));
         assert_eq!(detect_expression_right("1+ sqrt(5)".to_string()), Some(" sqrt(5)".to_string()));
-        assert_eq!(detect_expression_right("(".to_string()), None);
+        assert_eq!(detect_expression_right("(10.0^(2".to_string()), Some("2".to_string()));
+        assert_eq!(detect_expression_right("(".to_string()), Some("".to_string()));
 
     }
 }

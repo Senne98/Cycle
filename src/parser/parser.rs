@@ -30,15 +30,18 @@ fn standardize_expression(input: String) -> String {
 }
 
 fn add_braces(input: String) -> Option<String> {
-    let Some(result) = add_braces_for_symbol(input, &['^']) else {
+    let normalized = input.replace("- ", "\u{0} ");
+    let Some(result) = add_braces_for_symbol(normalized, &['^']) else {
         return None;
     };
     let Some(result) = add_braces_for_symbol(result, &['*', '/']) else {
         return None;
     };
-    let normalized = result.replace("- ", "\u{0}");
-    let result = add_braces_for_symbol(normalized, &['+', '\u{0}']);
-    return result;
+    let Some(result) = add_braces_for_symbol(result, &['+', '\u{0}']) else {
+        return None;
+    };
+    let result = result.replace("\u{0}", "-");
+    return Some(result);
 }
 
 fn add_braces_for_symbol(input: String, symbols: &[char]) -> Option<String> {
@@ -50,15 +53,10 @@ fn add_braces_for_symbol(input: String, symbols: &[char]) -> Option<String> {
     let mut right = right_temp.clone().to_string();
     let mut symbol = input.strip_prefix(&left).unwrap().chars().next().unwrap();
 
-    println!("left = {:?}", left);
-    println!("right = {:?}", right);
-
     loop {
         let Some(left_expression) = detect_expression_right(left.to_string()) else {
             return None;
         };
-
-        println!("l_ex = {:?}", left_expression);
 
         left = left.strip_suffix(&left_expression).unwrap().to_string();
         left.push_str("(");
@@ -69,8 +67,6 @@ fn add_braces_for_symbol(input: String, symbols: &[char]) -> Option<String> {
         let Some(right_expression) = detect_expression_left(right.to_string()) else {
             return None;
         };
-
-        println!("r_exp = {:?}", right_expression);
 
         let right_clone = right.clone();
         let right_residue = right_clone.strip_prefix(&right_expression).unwrap();
@@ -88,15 +84,23 @@ fn add_braces_for_symbol(input: String, symbols: &[char]) -> Option<String> {
 
         left.push_str(left_temp); 
         right = right_temp.clone().to_string();
-
-        println!("left = {:?}", left);
-        println!("right = {:?}", right);
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    
+    #[test]
+    fn test_add_braces() {
+        assert_eq!(add_braces("2 + 3".to_string()), Some("(2 + 3)".to_string()));
+        assert_eq!(add_braces("2 - 3".to_string()), Some("(2 - 3)".to_string()));
+        assert_eq!(add_braces("2 * 3".to_string()), Some("(2 * 3)".to_string()));
+        assert_eq!(add_braces("2 / 3".to_string()), Some("(2 / 3)".to_string()));
+        assert_eq!(add_braces("2 ^ 3".to_string()), Some("(2 ^ 3)".to_string()));
+        assert_eq!(add_braces("2^3 + 5 * 8 - 0.05 / 3.25".to_string()), Some("(((2^3) +( 5 * 8)) -( 0.05 / 3.25))".to_string()));
+        assert_eq!(add_braces("5 *0.3 - 8^(5-0.3) * exp(5)".to_string()), Some("((5 *0.3) -(( 8^(5-0.3)) * exp(5)))".to_string()));
+    }
 
     #[test]
     fn test_add_braces_for_symbol() {

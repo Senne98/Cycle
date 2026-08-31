@@ -315,41 +315,30 @@ pub fn detect_expression_right(input: String) -> Option<String> {
 
     let unpadded_input = input.strip_suffix(&right_padding).unwrap().to_string();
 
-    let normalized = unpadded_input.replace("- ", "\u{0}");
-    let mut iter = normalized.split(|c| {c == '\u{0}' || c == '+' || c == '*' || c == '/' || c == '^' || c == '('});
+    let mut right: String = unpadded_input.clone();
+    let test_expr = detect_expression_left(right.clone());
 
-    let mut last = iter.next_back();
-    if last.is_none() {
+    if !test_expr.is_none() && test_expr.unwrap() == right {
+        return Some(right + &right_padding);
+    }
+
+    let right_clone = right.clone();
+    let Some((_, right_temp)) = right_clone.split_once(|c| {c == '\u{0}' || c == '+' || c == '*' || c == '/' || c == '^' || c == '('}) else {
         return None;
-    }
-    let mut expression: String = last.unwrap().to_string();
-    let test_expr = detect_expression_left(expression.clone());
+    };
+    right = right_temp.to_string();
 
-    if !test_expr.is_none() && test_expr.unwrap() == expression {
-        return Some(expression + &right_padding);
-    }
-
-    last = iter.next_back();
-        
-    while last != None {
-        let old_expression = expression.clone();
-        expression = last.unwrap().to_string();
-
-        let operator = unpadded_input.clone().strip_suffix(&old_expression.clone()).unwrap().chars().last().unwrap();
-        if operator == ' ' {
-            expression.push_str("- ");
-        } else {
-            expression.push(operator);
+    loop {
+        let test_expr = detect_expression_left(right.clone());
+        if !test_expr.is_none() && test_expr.unwrap() == right {
+            return Some(right + &right_padding);
         }
 
-        expression.push_str(&old_expression);
-
-        let test_expr = detect_expression_left(expression.clone());
-        if !test_expr.is_none() && test_expr.unwrap() == expression {
-            return Some(expression + &right_padding);
-        }
-
-        last = iter.next_back();
+        let right_clone = right.clone();
+        let Some((_, right_temp)) = right_clone.split_once(|c| {c == '\u{0}' || c == '+' || c == '*' || c == '/' || c == '^' || c == '('}) else {
+            return None;
+        };
+        right = right_temp.to_string();
     }
 
     return None;
@@ -410,7 +399,7 @@ mod tests {
 
         assert_eq!(detect_expression_left("10.0 + (5 * \\test)".to_string()), Some("10.0".to_string()));
         assert_eq!(detect_expression_left("-10.0 * sqrt(5)".to_string()), Some("-10.0".to_string()));
-        assert_eq!(detect_expression_left("(5 * 10 + 3) - 1.3".to_string()), Some("(5 * 10 + 3)".to_string()));
+        assert_eq!(detect_expression_left("(5 * 10 + 3) \u{0} 1.3".to_string()), Some("(5 * 10 + 3)".to_string()));
         assert_eq!(detect_expression_left("\\test_{5} + 2".to_string()), Some("\\test_{5}".to_string()));
 
         assert_eq!(detect_expression_left("1.0. + 2".to_string()), None);
@@ -521,7 +510,7 @@ mod tests {
 
     #[test]
     fn test_detect_expression_right() {
-        //assert_eq!(detect_expression_right("(10 * 5)".to_string()), Some("(10 * 5)".to_string()));
+        assert_eq!(detect_expression_right("(10 * 5)".to_string()), Some("(10 * 5)".to_string()));
         assert_eq!(detect_expression_right("(10 * 5) + 3".to_string()), Some(" 3".to_string()));
         assert_eq!(detect_expression_right("(10 * 5) + \\latex ".to_string()), Some(" \\latex ".to_string()));
         assert_eq!(detect_expression_right("(10 * (5))".to_string()), Some("(10 * (5))".to_string()));

@@ -261,6 +261,36 @@ fn check_operators_left(input: String) -> Option<String> {
         return Some(result);
     }
 
+    if input.starts_with("ln(") {
+        let expression = braces_left(input.strip_prefix("ln").unwrap().to_string());
+        if expression.is_none() {
+            return None;
+        }
+        let mut result = "ln".to_string();
+        result.push_str(&expression.unwrap());
+        return Some(result);
+    }
+
+    if input.starts_with("log(") {
+        let expression = braces_left(input.strip_prefix("log").unwrap().to_string());
+        if expression.is_none() {
+            return None;
+        }
+        let mut result = "log".to_string();
+        result.push_str(&expression.unwrap());
+        return Some(result);
+    }
+
+    if input.starts_with("exp(") {
+        let expression = braces_left(input.strip_prefix("exp").unwrap().to_string());
+        if expression.is_none() {
+            return None;
+        }
+        let mut result = "exp".to_string();
+        result.push_str(&expression.unwrap());
+        return Some(result);
+    }
+
     return None;
 }
 

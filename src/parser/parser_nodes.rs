@@ -2,16 +2,7 @@ use crate::parser::constants;
 
 pub trait Node {
     fn result(&self) -> Option<f64>;
-}
-
-pub trait OperationNode {
-    fn calculate(&self) -> Option<f64>;
-}
-
-impl<T: OperationNode> Node for T {
-    fn result(&self) -> Option<f64> {
-        return self.calculate();
-    }
+    fn to_string(&self) -> String;
 }
 
 // NullNode
@@ -29,6 +20,10 @@ impl NullNode {
 impl Node for NullNode { 
     fn result(&self) -> Option<f64> {
         return None;
+    }
+
+    fn to_string(&self) -> String {
+        "Null".to_string()
     }
 }
 
@@ -50,37 +45,45 @@ impl Node for ValueNode {
     fn result(&self) -> Option<f64> {
         return Some(self.value);
     }
+
+    fn to_string(&self) -> String {
+        "value: ".to_string() + &self.value.to_string()
+    }
 }
 
 // VariableNode
 
-pub struct VariableNode<'a> {
-    value: &'a str,
+pub struct VariableNode {
+    value: String,
 }
 
-impl<'a> VariableNode<'a> {
-    pub fn new(val: &'a str) -> VariableNode<'a> {
+impl VariableNode {
+    pub fn new(val: String) -> VariableNode {
         Self {
             value: val,
         }
     }
 }
 
-impl Node for VariableNode<'_> {
+impl Node for VariableNode {
     fn result(&self) -> Option<f64> {
-        return constants::get_value_as_f64(self.value);
+        return constants::get_value_as_f64(&self.value);
+    }
+
+    fn to_string(&self) -> String {
+        "variable: ".to_string() + &self.value
     }
 }
 
 // MultiplicationNode
 
-pub struct MultiplicationNode<'a> {
-    left_node: &'a dyn Node,
-    right_node: &'a dyn Node,
+pub struct MultiplicationNode {
+    left_node: Box<dyn Node>,
+    right_node: Box<dyn Node>,
 }
 
-impl<'a> MultiplicationNode<'a> {
-    pub fn new(left: &'a dyn Node, right: &'a dyn Node) -> MultiplicationNode<'a> {
+impl MultiplicationNode {
+    pub fn new(left: Box<dyn Node>, right: Box<dyn Node>) -> MultiplicationNode {
         Self {
             left_node: left,
             right_node: right,
@@ -88,8 +91,8 @@ impl<'a> MultiplicationNode<'a> {
     }
 }
 
-impl OperationNode for MultiplicationNode<'_> {
-    fn calculate(&self) -> Option<f64> {
+impl Node for MultiplicationNode {
+    fn result(&self) -> Option<f64> {
         let left = self.left_node.result();
         let right = self.right_node.result();
 
@@ -99,17 +102,22 @@ impl OperationNode for MultiplicationNode<'_> {
 
         return Some(left.expect("left_node should be a f64") * right.expect("right_node should be a f64"));
     }
+
+    fn to_string(&self) -> String {
+        "multiplication: {".to_string() + &self.left_node.to_string() + " ," + &self.right_node.to_string() + "}"
+    }
 }
+
 
 // DivisionNode
 
-pub struct DivisionNode<'a> {
-    left_node: &'a dyn Node,
-    right_node: &'a dyn Node,
+pub struct DivisionNode {
+    left_node: Box<dyn Node>,
+    right_node: Box<dyn Node>,
 }
 
-impl<'a> DivisionNode<'a> {
-    pub fn new(left: &'a dyn Node, right: &'a dyn Node) -> DivisionNode<'a> {
+impl DivisionNode {
+    pub fn new(left: Box<dyn Node>, right: Box<dyn Node>) -> DivisionNode {
         Self {
             left_node: left,
             right_node: right,
@@ -117,8 +125,8 @@ impl<'a> DivisionNode<'a> {
     }
 }
 
-impl OperationNode for DivisionNode<'_> {
-    fn calculate(&self) -> Option<f64> {
+impl Node for DivisionNode {
+    fn result(&self) -> Option<f64> {
         let left = self.left_node.result();
         let right = self.right_node.result();
 
@@ -128,17 +136,21 @@ impl OperationNode for DivisionNode<'_> {
 
         return Some(left.expect("left_node should be a f64") / right.expect("right_node should be a f64"));
     }
+
+    fn to_string(&self) -> String {
+        "division: {".to_string() + &self.left_node.to_string() + " ," + &self.right_node.to_string() + "}"
+    }
 }
 
 // AdditionNode
 
-pub struct AdditionNode<'a> {
-    left_node: &'a dyn Node,
-    right_node: &'a dyn Node,
+pub struct AdditionNode {
+    left_node: Box<dyn Node>,
+    right_node: Box<dyn Node>,
 }
 
-impl<'a> AdditionNode<'a> {
-    pub fn new(left: &'a dyn Node, right: &'a dyn Node) -> AdditionNode<'a> {
+impl AdditionNode {
+    pub fn new(left: Box<dyn Node>, right: Box<dyn Node>) -> AdditionNode {
         Self {
             left_node: left,
             right_node: right,
@@ -146,8 +158,8 @@ impl<'a> AdditionNode<'a> {
     }
 }
 
-impl OperationNode for AdditionNode<'_> {
-    fn calculate(&self) -> Option<f64> {
+impl Node for AdditionNode {
+    fn result(&self) -> Option<f64> {
         let left = self.left_node.result();
         let right = self.right_node.result();
 
@@ -157,17 +169,21 @@ impl OperationNode for AdditionNode<'_> {
 
         return Some(left.expect("left_node should be a f64") + right.expect("right_node should be a f64"));
     }
+
+    fn to_string(&self) -> String {
+        "addition: {".to_string() + &self.left_node.to_string() + " ," + &self.right_node.to_string() + "}"
+    }
 }
 
 // SubtractionNode
 
-pub struct SubtractionNode<'a> {
-    left_node: &'a dyn Node,
-    right_node: &'a dyn Node,
+pub struct SubtractionNode {
+    left_node: Box<dyn Node>,
+    right_node: Box<dyn Node>,
 }
 
-impl<'a> SubtractionNode<'a> {
-    pub fn new(left: &'a dyn Node, right: &'a dyn Node) -> SubtractionNode<'a> {
+impl SubtractionNode {
+    pub fn new(left: Box<dyn Node>, right: Box<dyn Node>) -> SubtractionNode {
         Self {
             left_node: left,
             right_node: right,
@@ -175,8 +191,8 @@ impl<'a> SubtractionNode<'a> {
     }
 }
 
-impl OperationNode for SubtractionNode<'_> {
-    fn calculate(&self) -> Option<f64> {
+impl Node for SubtractionNode {
+    fn result(&self) -> Option<f64> {
         let left = self.left_node.result();
         let right = self.right_node.result();
 
@@ -185,6 +201,38 @@ impl OperationNode for SubtractionNode<'_> {
         }
 
         return Some(left.expect("left_node should be a f64") - right.expect("right_node should be a f64"));
+    }
+
+    fn to_string(&self) -> String {
+         "subtraction: {".to_string() + &self.left_node.to_string() + " ," + &self.right_node.to_string() + "}"
+    }
+}
+
+// SqrtNode
+
+pub struct SqrtNode {
+    node: Box<dyn Node>,
+}
+
+impl SqrtNode {
+    pub fn new(node: Box<dyn Node>) -> SqrtNode {
+        Self {
+            node: node,
+        }
+    }
+}
+
+impl Node for SqrtNode {
+    fn result(&self) -> Option<f64> {
+        let Some(result) = self.node.result() else {
+            return None;
+        };
+
+        return Some(result.sqrt());
+    }
+
+    fn to_string(&self) -> String {
+        "sqrt: {".to_string() + &self.node.to_string() + "}"
     }
 }
 
@@ -222,10 +270,10 @@ mod tests {
 
     #[test]
     fn test_multiplication_node_new() {
-        let left = ValueNode::new(11.0);
-        let right = ValueNode::new(5.5);
+        let left = Box::new(ValueNode::new(11.0));
+        let right = Box::new(ValueNode::new(5.5));
 
-        let node = MultiplicationNode::new(&left, &right);
+        let node = MultiplicationNode::new(left, right);
 
         assert_eq!(node.left_node.result(), Some(11.0));
         assert_eq!(node.right_node.result(), Some(5.5));
@@ -233,10 +281,10 @@ mod tests {
 
     #[test]
     fn test_multiplication_node_result() {
-        let left = ValueNode::new(11.0);
-        let right = ValueNode::new(5.5);
+        let left = Box::new(ValueNode::new(11.0));
+        let right = Box::new(ValueNode::new(5.5));
 
-        let node = MultiplicationNode::new(&left, &right);
+        let node = MultiplicationNode::new(left, right);
 
         assert_eq!(node.result(), Some(60.5));
     }
@@ -245,10 +293,10 @@ mod tests {
 
     #[test]
     fn test_division_node_new() {
-        let left = ValueNode::new(0.0);
-        let right = ValueNode::new(57.98);
+        let left = Box::new(ValueNode::new(0.0));
+        let right = Box::new(ValueNode::new(57.98));
 
-        let node = DivisionNode::new(&left, &right);
+        let node = DivisionNode::new(left, right);
 
         assert_eq!(node.left_node.result(), Some(0.0));
         assert_eq!(node.right_node.result(), Some(57.98));
@@ -256,10 +304,10 @@ mod tests {
 
     #[test]
     fn test_division_node_result() {
-        let left = ValueNode::new(7.5);
-        let right = ValueNode::new(0.5);
+        let left = Box::new(ValueNode::new(7.5));
+        let right = Box::new(ValueNode::new(0.5));
 
-        let node = DivisionNode::new(&left, &right);
+        let node = DivisionNode::new(left, right);
 
         assert_eq!(node.result(), Some(15.0));
     }
@@ -268,10 +316,10 @@ mod tests {
 
     #[test]
     fn test_addition_node_new() {
-        let left = ValueNode::new(9.1);
-        let right = ValueNode::new(-0.3);
+        let left = Box::new(ValueNode::new(9.1));
+        let right = Box::new(ValueNode::new(-0.3));
 
-        let node = AdditionNode::new(&left, &right);
+        let node = AdditionNode::new(left, right);
 
         assert_eq!(node.left_node.result(), Some(9.1));
         assert_eq!(node.right_node.result(), Some(-0.3));
@@ -279,24 +327,24 @@ mod tests {
 
     #[test]
     fn test_addition_node_result() {
-        let mut left = ValueNode::new(5.3);
-        let mut right = ValueNode::new(0.5);
+        let mut left = Box::new(ValueNode::new(5.3));
+        let mut right = Box::new(ValueNode::new(0.5));
 
-        let mut node = AdditionNode::new(&left, &right);
+        let mut node = AdditionNode::new(left, right);
 
         assert_eq!(node.result(), Some(5.8));
 
-        left = ValueNode::new(5.3);
-        right = ValueNode::new(-0.5);
+        left = Box::new(ValueNode::new(5.3));
+        right = Box::new(ValueNode::new(-0.5));
 
-        node = AdditionNode::new(&left, &right);
+        node = AdditionNode::new(left, right);
 
         assert_eq!(node.result(), Some(4.8));
 
-        left = ValueNode::new(-5.3);
-        right = ValueNode::new(0.5);
+        left = Box::new(ValueNode::new(-5.3));
+        right = Box::new(ValueNode::new(0.5));
 
-        node = AdditionNode::new(&left, &right);
+        node = AdditionNode::new(left, right);
 
         assert_eq!(node.result(), Some(-4.8));
     }
@@ -305,10 +353,10 @@ mod tests {
 
     #[test]
     fn test_subtraction_node_new() {
-        let left = ValueNode::new(10000.1);
-        let right = ValueNode::new(99.5);
+        let left = Box::new(ValueNode::new(10000.1));
+        let right = Box::new(ValueNode::new(99.5));
 
-        let node = SubtractionNode::new(&left, &right);
+        let node = SubtractionNode::new(left, right);
 
         assert_eq!(node.left_node.result(), Some(10000.1));
         assert_eq!(node.right_node.result(), Some(99.5));
@@ -316,24 +364,24 @@ mod tests {
 
     #[test]
     fn test_subtraction_node_result() {
-        let mut left = ValueNode::new(5.3);
-        let mut right = ValueNode::new(0.5);
+        let mut left = Box::new(ValueNode::new(5.3));
+        let mut right = Box::new(ValueNode::new(0.5));
 
-        let mut node = SubtractionNode::new(&left, &right);
+        let mut node = SubtractionNode::new(left, right);
 
         assert_eq!(node.result(), Some(4.8));
 
-        left = ValueNode::new(5.3);
-        right = ValueNode::new(-0.5);
+        left = Box::new(ValueNode::new(5.3));
+        right = Box::new(ValueNode::new(-0.5));
 
-        node = SubtractionNode::new(&left, &right);
+        node = SubtractionNode::new(left, right);
 
         assert_eq!(node.result(), Some(5.8));
 
-        left = ValueNode::new(-5.3);
-        right = ValueNode::new(0.5);
+        left = Box::new(ValueNode::new(-5.3));
+        right = Box::new(ValueNode::new(0.5));
 
-        node = SubtractionNode::new(&left, &right);
+        node = SubtractionNode::new(left, right);
 
         assert_eq!(node.result(), Some(-5.8));
     }

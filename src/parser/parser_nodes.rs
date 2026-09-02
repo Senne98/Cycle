@@ -208,6 +208,39 @@ impl Node for SubtractionNode {
     }
 }
 
+// PowerNode
+
+pub struct PowerNode {
+    left_node: Box<dyn Node>,
+    right_node: Box<dyn Node>,
+}
+
+impl PowerNode {
+    pub fn new(left: Box<dyn Node>, right: Box<dyn Node>) -> PowerNode {
+        Self {
+            left_node: left,
+            right_node: right,
+        }
+    }
+}
+
+impl Node for PowerNode {
+    fn result(&self) -> Option<f64> {
+        let left = self.left_node.result();
+        let right = self.right_node.result();
+
+        if left == None || right == None {
+            return None;
+        }
+
+        return Some(left.expect("left_node should be a f64").powf(right.expect("right_node should be a f64")));
+    }
+
+    fn to_string(&self) -> String {
+         "power: {".to_string() + &self.left_node.to_string() + " ," + &self.right_node.to_string() + "}"
+    }
+}
+
 // SqrtNode
 
 pub struct SqrtNode {
@@ -235,6 +268,63 @@ impl Node for SqrtNode {
         "sqrt: {".to_string() + &self.node.to_string() + "}"
     }
 }
+
+// LnNode
+
+pub struct LnNode {
+    node: Box<dyn Node>,
+}
+
+impl LnNode {
+    pub fn new(node: Box<dyn Node>) -> LnNode {
+        Self {
+            node: node,
+        }
+    }
+}
+
+impl Node for LnNode {
+    fn result(&self) -> Option<f64> {
+        let Some(result) = self.node.result() else {
+            return None;
+        };
+
+        return Some(result.ln());
+    }
+
+    fn to_string(&self) -> String {
+        "ln: {".to_string() + &self.node.to_string() + "}"
+    }
+}
+
+// LogNode
+
+pub struct LogNode {
+    node: Box<dyn Node>,
+}
+
+impl LogNode {
+    pub fn new(node: Box<dyn Node>) -> LogNode {
+        Self {
+            node: node,
+        }
+    }
+}
+
+impl Node for LogNode {
+    fn result(&self) -> Option<f64> {
+        let Some(result) = self.node.result() else {
+            return None;
+        };
+
+        return Some(result.log10());
+    }
+
+    fn to_string(&self) -> String {
+        "log: {".to_string() + &self.node.to_string() + "}"
+    }
+}
+
 
 #[cfg(test)]
 mod tests {

@@ -113,26 +113,18 @@ fn braces_left(input: String) -> Option<String> {
     return Some(expression.into_iter().collect());
 }
 
-fn latex_variable_left(input: String) -> Option<String> {
+pub fn latex_variable_left(input: String) -> Option<String> {
     let mut expression: String = "\\".to_string();
 
     let mut trimmed_input = input.clone();
     trimmed_input = trimmed_input.strip_prefix("\\").unwrap().to_string();
 
-    let name = latex_variable_left_name(trimmed_input.clone());
-    if name.is_none() {
-        return None;
-    }
-    let name = &name.unwrap();
+    let Some(name) = &latex_variable_left_name(trimmed_input.clone()) else { return None; };
 
     trimmed_input = trimmed_input.strip_prefix(name).unwrap().to_string();
     expression.push_str(name);
 
-    let current_char_wraped = trimmed_input.chars().next();
-    if current_char_wraped.is_none() {
-        return Some(expression);
-    }
-    let current_char = current_char_wraped.unwrap();
+    let Some(current_char) = trimmed_input.chars().next() else { return Some(expression); };
     
     if !(current_char == '_' || current_char == '^') {
         return Some(expression);
@@ -145,32 +137,20 @@ fn latex_variable_left(input: String) -> Option<String> {
     expression.push(current_char);
     trimmed_input = trimmed_input.strip_prefix(current_char).unwrap().to_string();
 
-    let script = latex_variable_left_script(trimmed_input.clone());
-    if script.is_none() {
-        return None;
-    }
-    let script = &script.unwrap();
-
+    let Some(script) = &latex_variable_left_script(trimmed_input.clone()) else { return None; };
+    
     trimmed_input = trimmed_input.strip_prefix(script).unwrap().to_string();
     expression.push_str(script);
 
-    let current_char_wraped = trimmed_input.chars().next();
-    if current_char_wraped.is_none() {
-        return Some(expression);
-    }
-    let current_char = current_char_wraped.unwrap();
-
+    let Some(current_char) = trimmed_input.chars().next() else { return Some(expression); };
+    
     if !((detected_subscript && current_char == '^') || (!detected_subscript && current_char == '_')) {
         return Some(expression);
     }
     expression.push(current_char);
     trimmed_input = trimmed_input.strip_prefix(current_char).unwrap().to_string();
 
-    let script = latex_variable_left_script(trimmed_input.clone());
-    if script.is_none() {
-        return None;
-    }
-    let script = &script.unwrap();
+    let Some(script) = &latex_variable_left_script(trimmed_input.clone()) else { return None; };
 
     expression.push_str(script);
 
@@ -340,8 +320,6 @@ pub fn detect_expression_right(input: String) -> Option<String> {
         };
         right = right_temp.to_string();
     }
-
-    return None;
 }
 
 #[cfg(test)]

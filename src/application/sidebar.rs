@@ -50,6 +50,7 @@ pub fn get_active_tab() -> Tab {
 }
 
 pub fn create_sidebar() -> NavigationPage {
+    generate_icon();
     let item_calculator = SidebarItem::new(&Tab::Calculator.to_str().unwrap());
     item_calculator.set_icon_name(Some("accessories-calculator-symbolic"));
 

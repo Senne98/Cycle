@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="">
+  <g style="" transform="matrix(1, 0, 0, 1, 1, 26)">
+    <g>
+      <title>calculator</title>
+      <rect x="70" width="300" height="400" style="stroke: rgb(0, 0, 0); stroke-width: 0px; fill: oklab(0.485 -0.085 0.058);" rx="20" ry="20" y="20"/>
+      <rect x="70" width="300" height="400" style="stroke: rgb(0, 0, 0); stroke-width: 0px; fill: oklab(0.718 -0.108 0.09);" rx="20" ry="20"/>
+      <rect x="110" width="220" height="100" style="stroke: rgb(0, 0, 0); stroke-width: 0px; fill: oklab(0.668 0.026 -0.015);" rx="20" ry="20" y="40"/>
+      <g transform="matrix(1, 0, 0, 0.833334, 0, 13.333305)">
+        <title>row</title>
+        <g transform="matrix(1.111111, 0, 0, 1.090909, -12.222222, -18.181818)">
+          <title>button</title>
+          <rect x="110" width="45" height="55" style="stroke: rgb(0, 0, 0); stroke-width: 0px; fill: oklab(0.57 0.03 0.097);" rx="20" ry="20" y="200"/>
+          <rect x="110" width="45" height="45" style="stroke: rgb(0, 0, 0); stroke-width: 0px; fill: oklab(0.718 0.054 0.121);" rx="20" ry="20" y="200"/>
+        </g>
+        <g transform="matrix(1.111111, 0, 0, 1.090909, 72.777786, -18.181818)">
+          <title>button</title>
+          <rect x="110" width="45" height="55" style="stroke: rgb(0, 0, 0); fill: oklab(0.57 0.029 0.097); stroke-width: 0px;" rx="20" ry="20" y="200"/>
+          <rect x="110" width="45" height="45" style="stroke: rgb(0, 0, 0); stroke-width: 0px; fill: oklab(0.717 0.054 0.121);" rx="20" ry="20" y="200"/>
+        </g>
+        <g transform="matrix(1.111111, 0, 0, 1.090909, 157.777786, -18.181818)">
+          <title>button</title>
+          <rect x="110" width="45" height="55" style="stroke: rgb(0, 0, 0); fill: oklab(0.57 0.029 0.097); stroke-width: 0px;" rx="20" ry="20" y="200"/>
+          <rect x="110" width="45" height="45" style="stroke: rgb(0, 0, 0); stroke-width: 0px; fill: oklab(0.717 0.054 0.121);" rx="20" ry="20" y="200"/>
+        </g>
+      </g>
+      <g transform="matrix(1, 0, 0, 0.833334, 0.000008, 78.333206)">
+        <title>row</title>
+        <g transform="matrix(1.111111, 0, 0, 1.090909, -12.222222, -18.181818)">
+          <title>button</title>
+          <rect x="110" width="45" height="55" style="stroke: rgb(0, 0, 0); stroke-width: 0px; fill: oklab(0.57 0 0);" rx="20" ry="20" y="200"/>
+          <rect x="110" width="45" height="45" style="stroke: rgb(0, 0, 0); fill: oklab(0.718 0 0); stroke-width: 0px;" rx="20" ry="20" y="200"/>
+        </g>
+        <g transform="matrix(1.111111, 0, 0, 1.090909, 72.777786, -18.181818)">
+          <title>button</title>
+          <rect x="110" width="45" height="55" style="stroke: rgb(0, 0, 0); stroke-width: 0px; fill: rgb(119, 119, 119);" rx="20" ry="20" y="200"/>
+          <rect x="110" width="45" height="45" style="stroke: rgb(0, 0, 0); fill: rgb(164, 164, 164); stroke-width: 0px;" rx="20" ry="20" y="200"/>
+        </g>
+        <g transform="matrix(1.111111, 0, 0, 1.090909, 157.777786, -18.181818)">
+          <title>button</title>
+          <rect x="110" width="45" height="55" style="stroke: rgb(0, 0, 0); stroke-width: 0px; fill: rgb(119, 119, 119);" rx="20" ry="20" y="200"/>
+          <rect x="110" width="45" height="45" style="stroke: rgb(0, 0, 0); fill: rgb(164, 164, 164); stroke-width: 0px;" rx="20" ry="20" y="200"/>
+        </g>
+      </g>
+      <g transform="matrix(1, 0, 0, 0.833334, 0.000008, 143.333206)">
+        <title>row</title>
+        <g transform="matrix(1.111111, 0, 0, 1.090909, -12.222222, -18.181818)">
+          <title>button</title>
+          <rect x="110" width="45" height="55" style="stroke: rgb(0, 0, 0); stroke-width: 0px; fill: rgb(119, 119, 119);" rx="20" ry="20" y="200"/>
+          <rect x="110" width="45" height="45" style="stroke: rgb(0, 0, 0); fill: rgb(164, 164, 164); stroke-width: 0px;" rx="20" ry="20" y="200"/>
+        </g>
+        <g transform="matrix(1.111111, 0, 0, 1.090909, 72.777786, -18.181818)">
+          <title>button</title>
+          <rect x="110" width="45" height="55" style="stroke: rgb(0, 0, 0); stroke-width: 0px; fill: rgb(119, 119, 119);" rx="20" ry="20" y="200"/>
+          <rect x="110" width="45" height="45" style="stroke: rgb(0, 0, 0); fill: rgb(164, 164, 164); stroke-width: 0px;" rx="20" ry="20" y="200"/>
+        </g>
+        <g transform="matrix(1.111111, 0, 0, 1.090909, 157.777786, -18.181818)">
+          <title>button</title>
+          <rect x="110" width="45" height="55" style="stroke: rgb(0, 0, 0); stroke-width: 0px; fill: rgb(119, 119, 119);" rx="20" ry="20" y="200"/>
+          <rect x="110" width="45" height="45" style="stroke: rgb(0, 0, 0); fill: rgb(164, 164, 164); stroke-width: 0px;" rx="20" ry="20" y="200"/>
+        </g>
+      </g>
+      <path d="M 130 40 L 310 40 C 321.046 40 330 48.954 330 60 L 330 70 C 330 58.954 321.046 50 310 50 L 130 50 C 118.954 50 110 58.954 110 70 L 110 60 C 110 48.954 118.954 40 130 40 Z" style="stroke: rgb(0, 0, 0); visibility: visible; fill: rgb(52, 110, 57); stroke-width: 0px;"/>
+    </g>
+    <g>
+      <title>triangle</title>
+      <path d="M 449.34 115.33 C 456.447 108.223 460 108.223 460 115.33 L 460 449.34 C 460 456.447 456.447 460 449.34 460 L 115.33 460 C 108.223 460 108.223 456.447 115.33 449.34 Z M 251.421 401.4 L 401.421 401.4 L 401.421 251.4 Z" style="stroke: rgb(0, 0, 0); stroke-width: 0px; fill: oklab(0.503 -0.038 -0.129);"/>
+      <path d="M 449.34 110.33 C 456.447 103.223 460 103.223 460 110.33 L 460 444.34 C 460 451.447 456.447 455 449.34 455 L 115.33 455 C 108.223 455 108.223 451.447 115.33 444.34 Z M 251.421 396.421 L 401.421 396.421 L 401.421 246.421 Z" style="stroke: rgb(0, 0, 0); fill: rgb(100, 167, 246); stroke-width: 0px;"/>
+      <path style="stroke: oklab(0.359 -0.019 -0.116); fill: none; stroke-width: 6px; transform-origin: 284.5px 0px;" d="M 114.5 449.503 L 454.5 109.5"/>
+    </g>
+  </g>
+</svg>

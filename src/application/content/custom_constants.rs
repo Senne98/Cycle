@@ -5,7 +5,7 @@ use crate::parser::constants::*;
 use adw;
 use adw::prelude::*;
 use adw::{ActionRow, ButtonRow, Dialog, DialogPresentationMode, EntryRow, ToolbarView, ToolbarStyle, HeaderBar, Banner, ButtonContent};
-use adw::gtk::{ListBox, SelectionMode, ScrolledWindow, Image, Box, Orientation, Button};
+use adw::gtk::{ListBox, SelectionMode, ScrolledWindow, Image, Box, Orientation, Button, Label, Align};
 use adw::gdk::{Display};
 
 use std::vec::Vec;
@@ -19,8 +19,12 @@ thread_local! {
 
 pub fn create_custom_const_page() {
     build_list();
+    
+    let scroll_box = Box::new(Orientation::Vertical, 0);
+    scroll_box.append(&LIST_BOX.with(|l| (**l).clone()));
+
     SCROLLED_LIST.with(|s| {
-        s.set_child(Some(&LIST_BOX.with(|l| (**l).clone())));
+        s.set_child(Some(&scroll_box));
     });
 }
 
@@ -29,12 +33,6 @@ pub fn get_scrolled_list() -> ScrolledWindow {
 }
 
 fn build_list() {
-    LIST_BOX.with(|l| {
-        while let Some(child) = l.first_child() {
-            l.remove(&child);
-        }
-    });
-
     let rows: Vec<ActionRow> = get_custom_constants().into_iter()
         .map(|(latex, name, display, value)| create_const_row(&latex, &name, &display, &value))
         .collect();

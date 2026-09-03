@@ -23,10 +23,6 @@ pub fn create_default_const_page() {
         .css_classes(vec![String::from("boxed-list")])
         .build();
 
-    while let Some(child) = list_box.first_child() {
-        list_box.remove(&child);
-    }
-
     for constant in constants {
         let (latex, name, display, value) = constant;
         

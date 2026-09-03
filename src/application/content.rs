@@ -17,9 +17,6 @@ thread_local! {
 }
 
 pub fn create_content() -> NavigationPage {
-    custom_constants::create_custom_const_page(); 
-    default_constants::create_default_const_page(); 
-    
     HEADER.with(|h| {
         h.set_decoration_layout(Some(":close"));
     });

@@ -9,6 +9,8 @@
 
 use std::sync::{LazyLock, Mutex};
 use std::fs;
+use std::fs::File;
+use std::io::Write;
 
 use indexmap::map::IndexMap;
 
@@ -65,6 +67,24 @@ pub fn is_constant(latex: &str) -> bool {
     return CUSTOM_CONSTANTS.lock().unwrap().contains_key(latex);
 }
 
+pub fn get_custom_constants() -> Vec<(String, String, String, String)> {
+    CUSTOM_CONSTANTS.lock().unwrap().iter()
+            .map(|(latex, (name, display, value))| (latex.clone(), name.clone(), display.clone(), value.clone()))
+            .collect()
+}
+
+pub fn get_default_constants() -> Vec<(String, String, String, String)> {
+    DEFAULT_CONSTANTS.lock().unwrap().iter()
+            .map(|(latex, (name, display, value))| (latex.clone(), name.clone(), display.clone(), value.clone()))
+            .collect()
+}
+
+
+pub fn remove_custom_constant(latex: String) {
+    CUSTOM_CONSTANTS.lock().unwrap().shift_remove(&latex);
+    save_custom_constants();
+}
+
 // Load constants from disk
 
 const DEFAULT_CONSTANTS_FILE: &str = "rescources/default_constants.csv";
@@ -79,6 +99,7 @@ pub fn add_custom_constant(latex: &str, name: &str, display: &str, value: &str) 
     // VALIDATE VALUES
     // ADD TESTCASE
     CUSTOM_CONSTANTS.lock().unwrap().insert(latex.to_string(), (name.to_string(), display.to_string(), value.to_string()));
+    save_custom_constants();
 }
 
 fn load_default_constants() {
@@ -115,6 +136,24 @@ fn load_custom_constants() {
 
         custom_constants.insert(latex.clone(), (name.clone(), display.clone(), value.clone()));
     }
+}
+
+fn save_custom_constants() {
+    let mut file_content = "".to_string();
+    let custom_constants = CUSTOM_CONSTANTS.lock().unwrap();
+    let latex_symbols = custom_constants.keys();
+
+    for latex in latex_symbols {
+        let (name, display, value) = custom_constants.get(latex).unwrap();
+        let latex = latex.clone();
+
+        file_content.push_str(&format!("{},{},{},{}\n", latex, name, display, value));
+    }
+
+    let _ = file_content.trim_end_matches("\n");
+
+    let mut file = File::create(CUSTOM_CONSTANTS_FILE).expect(&format!("Can't create file {CUSTOM_CONSTANTS_FILE}"));
+    let _ = file.write_all(file_content.as_bytes());
 }
 
 #[cfg(test)]

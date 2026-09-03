@@ -94,7 +94,7 @@ fn build_tree(expression: String) -> Option<Box<dyn Node>> {
         return None;
     }
 
-    let mut expression = remove_outer_braces(expression);
+    let expression = remove_outer_braces(expression);
         
     let Some(left_expression) = detect_expression_left(expression.clone()) else { return None; };
     let Some(left_node) = get_node(left_expression.clone()) else { return None; };

@@ -1,8 +1,9 @@
-mod window;
+mod application;
 mod parser;
 
-use window::window::Window;
-use window::window as wnd;
+use application::window::*;
+
+use parser::constants::*;
 
 use adw;
 use adw::prelude::*;
@@ -18,17 +19,14 @@ fn main() -> glib::ExitCode {
     return app.run();
 }
 
-fn build_ui(app: &adw::Application) {
-    let window_ref = Window::new(app);
-    let window = window_ref.borrow();
+fn build_ui(app: &Application) {
+    load_constants();
 
-    window.app_window.set_content(Some(&window.split_view));
+    create_application_window(app);
 
-    drop(window);
+    get_app_window().set_content(Some(&get_split_view()));
 
-    wnd::update(&window_ref);
+    update_window();
 
-    let window = window_ref.borrow();
-    window.app_window.present();
-    drop(window);
+    present_window()
 }

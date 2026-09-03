@@ -3,25 +3,29 @@ use crate::parser::constants::*;
 use adw;
 use adw::prelude::*;
 use adw::{ActionRow};
-use adw::gtk::{ListBox, SelectionMode, ScrolledWindow, Image};
+use adw::gtk::{ListBox, SelectionMode, ScrolledWindow, Image, Box, Orientation, Label, Align};
 use adw::gdk::{Display};
 
 use std::sync::LazyLock;
 
 thread_local! {
     static SCROLLED_LIST: LazyLock<ScrolledWindow> = LazyLock::new(|| ScrolledWindow::new());
-    static LIST_BOX: LazyLock<ListBox> = LazyLock::new(|| ListBox::builder().margin_top(32).margin_end(32).margin_bottom(32).margin_start(32)
-                .selection_mode(SelectionMode::None).css_classes(vec![String::from("boxed-list")]).build());
 }
 
 pub fn create_default_const_page() {
     let constants = get_default_constants();
+    let list_box: ListBox = ListBox::builder()
+        .margin_top(32)
+        .margin_end(32)
+        .margin_bottom(32)
+        .margin_start(32)
+        .selection_mode(SelectionMode::None)
+        .css_classes(vec![String::from("boxed-list")])
+        .build();
 
-    LIST_BOX.with(|l| {
-        while let Some(child) = l.first_child() {
-            l.remove(&child);
-        }
-    });
+    while let Some(child) = list_box.first_child() {
+        list_box.remove(&child);
+    }
 
     for constant in constants {
         let (latex, name, display, value) = constant;
@@ -41,13 +45,24 @@ pub fn create_default_const_page() {
             clipboard.set_text(&latex);
         });
 
-        LIST_BOX.with(|l| {
-            l.append(&row);
-        });
+        list_box.append(&row);
     }
 
+    let credits = Label::builder()
+        .label("All constants come from NIST (or wikipedia if not available on NIST)".to_string())
+        .wrap(true)
+        .halign(Align::Center)
+        .margin_top(0)
+        .margin_bottom(32)
+        .build();
+    credits.add_css_class("dim-label");
+
+    let scroll_box = Box::new(Orientation::Vertical, 0);
+    scroll_box.append(&list_box);
+    scroll_box.append(&credits);
+
     SCROLLED_LIST.with(|s| {
-        s.set_child(Some(&LIST_BOX.with(|l| (**l).clone())));
+        s.set_child(Some(&scroll_box));
     });
 }
 

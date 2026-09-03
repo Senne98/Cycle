@@ -1,12 +1,3 @@
-/*
-*   This code is just a placeholder api. The plan is to place everything
-*   related to constants in this file eventualy. Originaly I placed it in
-*   the UI code. Since I don't want to redo it now I'll do it later.
-*
-*   For now this is just API for new code to call so I at least don't 
-*   need to rewrite that in the future.
-*/
-
 use std::sync::{LazyLock, Mutex};
 use std::fs;
 use std::fs::File;

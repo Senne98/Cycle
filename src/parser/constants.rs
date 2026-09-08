@@ -81,7 +81,7 @@ pub fn remove_custom_constant(latex: String) {
 
 // Load constants from disk
 
-const CUSTOM_CONSTANTS_FILE: &str = "custom_constants.csv";
+const CUSTOM_CONSTANTS_FILE: &str = "~/.cycle/custom_constants.csv";
 
 pub fn load_constants() {
     load_default_constants();
@@ -97,7 +97,6 @@ pub fn add_custom_constant(latex: &str, name: &str, display: &str, value: &str) 
 
 fn load_default_constants() {
     let cst_file = include_str!("../../rescources/default_constants.csv");
-    //fs::read_to_string(DEFAULT_CONSTANTS_FILE).unwrap_or_else(|_| panic!("Can't read file {DEFAULT_CONSTANTS_FILE}"));
     let mut constants = cst_file.lines();
 
     let mut default_constants = DEFAULT_CONSTANTS.lock().unwrap();
@@ -116,6 +115,7 @@ fn load_default_constants() {
 }
 
 fn load_custom_constants() {
+    if !fs::exists(CUSTOM_CONSTANTS_FILE).unwrap() { return; }
     let cst_file = fs::read_to_string(CUSTOM_CONSTANTS_FILE).expect(&format!("Can't create file {CUSTOM_CONSTANTS_FILE}"));
     let constants = cst_file.lines();
 
@@ -133,6 +133,7 @@ fn load_custom_constants() {
 }
 
 fn save_custom_constants() {
+    let _ = fs::create_dir_all("~/.cycle/");
     let mut file_content = "".to_string();
     let custom_constants = CUSTOM_CONSTANTS.lock().unwrap();
     let latex_symbols = custom_constants.keys();

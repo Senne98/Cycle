@@ -1,3 +1,6 @@
+//Copyright (C) 2026  Senne98
+//Lisence: https://github.com/Senne98/Cycle/blob/main/LICENSE
+
 use crate::application::window::*;
 use crate::application::about::*;
 

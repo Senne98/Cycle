@@ -1,3 +1,6 @@
+//Copyright (C) 2026  Senne98
+//Lisence: https://github.com/Senne98/Cycle/blob/main/LICENSE
+
 pub trait CharVecToString {
     fn to_string_if_valid_f64(&self) -> Option<String>;
     fn to_string(&self) -> String;

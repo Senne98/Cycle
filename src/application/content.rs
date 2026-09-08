@@ -1,3 +1,6 @@
+//Copyright (C) 2026  Senne98
+//Lisence: https://github.com/Senne98/Cycle/blob/main/LICENSE
+
 pub mod default_constants;
 pub mod custom_constants;
 pub mod equations;

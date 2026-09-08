@@ -1,3 +1,6 @@
+//Copyright (C) 2026  Senne98
+//Lisence: https://github.com/Senne98/Cycle/blob/main/LICENSE
+
 use crate::application::sidebar::*;
 use crate::application::content::*;
 use crate::application::content::custom_constants::*;

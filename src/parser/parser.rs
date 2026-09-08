@@ -6,25 +6,36 @@ use crate::parser::detect_expression::CharIsLetter;
 
 use std::boxed::Box;
 
-struct MathTree<'a> {
-    root: &'a dyn Node,
+pub struct MathTree {
+    root: Box<dyn Node>,
     input: Option<String>,
+    result: Option<f64>,
 }
 
-impl<'a> MathTree<'a> {
+impl MathTree {
 
-    pub fn new(node: &'a dyn Node) -> Self {
+    pub fn new(node: Box<dyn Node>) -> Self {
         Self {
             root: node,
             input: None,
+            result: None,
         }
     }
 
     pub fn set_input(&mut self, input: String) {
         self.input = Some(standardize_expression(input));
-        if !self.input.is_none() {
-            self.input = add_braces(self.input.clone().unwrap());
+        self.input = add_braces(self.input.clone().unwrap());
+        let root = build_tree(self.input.clone().unwrap());
+        if root.is_none() {
+            self.root = Box::new(NullNode::new());
+        } else {
+            self.root = root.unwrap();
         }
+        self.result = self.root.result();
+    }
+
+    pub fn get_result(&self) -> Option<f64> {
+        self.result.clone()
     }
 }
 

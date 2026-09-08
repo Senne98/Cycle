@@ -1,5 +1,6 @@
 pub mod default_constants;
 pub mod custom_constants;
+pub mod equations;
 
 use crate::application::sidebar::*;
 
@@ -21,7 +22,7 @@ pub fn create_content() -> NavigationPage {
         h.set_decoration_layout(Some(":close"));
     });
 
-    let row = ActionRow::builder()
+    /*let row = ActionRow::builder()
         .activatable(true)
         .title("Click me")
         .build();
@@ -37,18 +38,21 @@ pub fn create_content() -> NavigationPage {
         .selection_mode(SelectionMode::None)
         .css_classes(vec![String::from("boxed-list")])
         .build();
-    list.append(&row);
+    list.append(&row);*/
 
     CONTENT_TOOLBAR.with(|c| {
         c.add_top_bar(&HEADER.with(|h| (**h).clone()));
-        c.set_content(Some(&list));
+        //c.set_content(Some(&list));
         c.set_top_bar_style(ToolbarStyle::Flat);
     });
 
     PAGE.with(|p| {
         p.set_title(&get_active_tab_name());
         p.set_child(Some(&CONTENT_TOOLBAR.with(|c| (**c).clone())));
+    });
 
+    update_content();
+    PAGE.with(|p| {
         return (**p).clone();
     })
 }
@@ -60,7 +64,9 @@ pub fn update_content() {
 
     CONTENT_TOOLBAR.with(|c| { 
         match get_active_tab() {
-            Tab::Calculator => {},
+            Tab::Calculator => {
+                c.set_content(Some(&equations::get_scrolled_list()))
+            },
             Tab::DefaultConstants => {
                 c.set_content(Some(&default_constants::get_scrolled_list()));
             },

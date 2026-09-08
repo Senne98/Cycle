@@ -2,6 +2,7 @@ use crate::application::sidebar::*;
 use crate::application::content::*;
 use crate::application::content::custom_constants::*;
 use crate::application::content::default_constants::*;
+use crate::application::content::equations::*;
 
 use adw;
 use adw::prelude::*;
@@ -26,6 +27,7 @@ pub fn create_application_window(app: &Application) {
 
     create_custom_const_page();
     create_default_const_page();
+    create_equations();
 
     let sidebar = create_sidebar();
     let content = create_content();

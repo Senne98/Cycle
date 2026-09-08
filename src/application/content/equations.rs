@@ -37,11 +37,10 @@ impl MathRow {
             tree: MathTree::new(Box::new(NullNode::new())),
             input: "".to_string(),
             list_box: ListBox::builder()
-                .margin_top(16)
+                .margin_top(8)
                 .margin_end(32)
-                .margin_bottom(32)
+                .margin_bottom(8)
                 .margin_start(32)
-                .width_request(354)
                 .selection_mode(SelectionMode::None)
                 .css_classes(vec![String::from("boxed-list")])
                 .build(),

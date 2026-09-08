@@ -78,7 +78,6 @@ pub fn remove_custom_constant(latex: String) {
 
 // Load constants from disk
 
-const DEFAULT_CONSTANTS_FILE: &str = "rescources/default_constants.csv";
 const CUSTOM_CONSTANTS_FILE: &str = "custom_constants.csv";
 
 pub fn load_constants() {

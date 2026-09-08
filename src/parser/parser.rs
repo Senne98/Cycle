@@ -25,13 +25,15 @@ impl MathTree {
     pub fn set_input(&mut self, input: String) {
         self.input = Some(standardize_expression(input));
         self.input = add_braces(self.input.clone().unwrap());
-        let root = build_tree(self.input.clone().unwrap());
-        if root.is_none() {
-            self.root = Box::new(NullNode::new());
-        } else {
-            self.root = root.unwrap();
+        if !self.input.is_none() {
+            let root = build_tree(self.input.clone().unwrap());
+            if root.is_none() {
+                self.root = Box::new(NullNode::new());
+            } else {
+                self.root = root.unwrap();
+            }
+            self.result = self.root.result();
         }
-        self.result = self.root.result();
     }
 
     pub fn get_result(&self) -> Option<f64> {

@@ -33,7 +33,7 @@ struct MathRow {
 
 impl MathRow {
     pub fn new() -> Self {
-        let mut row = Self {
+        let row = Self {
             tree: MathTree::new(Box::new(NullNode::new())),
             input: "".to_string(),
             list_box: ListBox::builder()
@@ -65,13 +65,13 @@ impl MathRow {
         Self::create_math_box(&this.clone());
         Self::create_output_box(&this.clone());
 
-        let mut row = this.borrow_mut();
+        let row = this.borrow();
         row.list_box.append(&row.math_box.clone());
         row.list_box.append(&row.output_box.clone());
     }
 
     fn create_output_box(this: &Rc<RefCell<Self>>) {
-        let mut row = this.borrow_mut();
+        let row = this.borrow();
 
         let copy_symbol = Image::from_icon_name("edit-copy-symbolic");
 
@@ -117,7 +117,6 @@ impl MathRow {
         let copy_button = Button::builder()
             .child(&copy_button_content)
             .build();
-        let copy_button_style = copy_button.style_context();
 
         let math_box_clone = row.math_box.clone();
 
@@ -160,10 +159,6 @@ impl MathRow {
         }
     }
 
-    fn get_id(&self) -> i32 {
-        self.id
-    }
-
     fn get_list_box(&self) -> ListBox {
         self.list_box.clone()
     }
@@ -180,7 +175,7 @@ thread_local! {
 fn insert_math_row(row_cell: &Rc<RefCell<MathRow>>) {
     let mut new_id: i32 = 0;
     {
-        let mut row = row_cell.borrow_mut();
+        let row = row_cell.borrow();
         let mut active_ids = ACTIVE_IDS.lock().unwrap(); 
         if active_ids.len() > 0 {
             new_id = active_ids.get(active_ids.len() - 1).unwrap() + 1;

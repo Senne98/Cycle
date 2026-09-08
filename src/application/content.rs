@@ -6,8 +6,7 @@ use crate::application::sidebar::*;
 
 use adw;
 use adw::prelude::*;
-use adw::{HeaderBar, ToolbarView, ToolbarStyle, NavigationPage, ActionRow};
-use adw::gtk::{ListBox, SelectionMode};
+use adw::{HeaderBar, ToolbarView, ToolbarStyle, NavigationPage};
 
 use std::sync::LazyLock;
 
@@ -22,27 +21,8 @@ pub fn create_content() -> NavigationPage {
         h.set_decoration_layout(Some(":close"));
     });
 
-    /*let row = ActionRow::builder()
-        .activatable(true)
-        .title("Click me")
-        .build();
-    row.connect_activated(|_| {
-        eprintln!("Click");
-    });
-
-    let list = ListBox::builder()
-        .margin_top(32)
-        .margin_end(32)
-        .margin_bottom(32)
-        .margin_start(32)
-        .selection_mode(SelectionMode::None)
-        .css_classes(vec![String::from("boxed-list")])
-        .build();
-    list.append(&row);*/
-
     CONTENT_TOOLBAR.with(|c| {
         c.add_top_bar(&HEADER.with(|h| (**h).clone()));
-        //c.set_content(Some(&list));
         c.set_top_bar_style(ToolbarStyle::Flat);
     });
 

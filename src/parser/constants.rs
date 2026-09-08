@@ -94,7 +94,8 @@ pub fn add_custom_constant(latex: &str, name: &str, display: &str, value: &str) 
 }
 
 fn load_default_constants() {
-    let cst_file = fs::read_to_string(DEFAULT_CONSTANTS_FILE).unwrap_or_else(|_| panic!("Can't read file {DEFAULT_CONSTANTS_FILE}"));
+    let cst_file = include_str!("../../rescources/default_constants.csv");
+    //fs::read_to_string(DEFAULT_CONSTANTS_FILE).unwrap_or_else(|_| panic!("Can't read file {DEFAULT_CONSTANTS_FILE}"));
     let mut constants = cst_file.lines();
 
     let mut default_constants = DEFAULT_CONSTANTS.lock().unwrap();

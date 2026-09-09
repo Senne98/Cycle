@@ -5,6 +5,7 @@ use std::sync::{LazyLock, Mutex};
 use std::fs;
 use std::fs::File;
 use std::io::Write;
+use std::env::home_dir;
 
 use indexmap::map::IndexMap;
 
@@ -81,8 +82,6 @@ pub fn remove_custom_constant(latex: String) {
 
 // Load constants from disk
 
-const CUSTOM_CONSTANTS_FILE: &str = "~/.cycle/custom_constants.csv";
-
 pub fn load_constants() {
     load_default_constants();
     load_custom_constants();
@@ -115,8 +114,8 @@ fn load_default_constants() {
 }
 
 fn load_custom_constants() {
-    if !fs::exists(CUSTOM_CONSTANTS_FILE).unwrap() { return; }
-    let cst_file = fs::read_to_string(CUSTOM_CONSTANTS_FILE).expect(&format!("Can't create file {CUSTOM_CONSTANTS_FILE}"));
+    if !fs::exists(home_dir().expect("Could not get home_dir").join(".cycle/custom_constants.csv")).unwrap() { return; }
+    let cst_file = fs::read_to_string(home_dir().expect("Could not get home_dir").join(".cycle/custom_constants.csv")).expect(&format!("Can't create file .cycle/custom_constants.csv"));
     let constants = cst_file.lines();
 
     let mut custom_constants = CUSTOM_CONSTANTS.lock().unwrap();
@@ -133,7 +132,7 @@ fn load_custom_constants() {
 }
 
 fn save_custom_constants() {
-    let _ = fs::create_dir_all("~/.cycle/");
+    let _ = fs::create_dir_all(home_dir().expect("Could not get home_dir").join(".cycle/"));
     let mut file_content = "".to_string();
     let custom_constants = CUSTOM_CONSTANTS.lock().unwrap();
     let latex_symbols = custom_constants.keys();
@@ -147,7 +146,7 @@ fn save_custom_constants() {
 
     let _ = file_content.trim_end_matches("\n");
 
-    let mut file = File::create(CUSTOM_CONSTANTS_FILE).expect(&format!("Can't create file {CUSTOM_CONSTANTS_FILE}"));
+    let mut file = File::create(home_dir().expect("Could not get home_dir").join(".cycle/custom_constants.csv")).expect(&format!("Can't create file .cycle/custom_constants.csv"));
     let _ = file.write_all(file_content.as_bytes());
 }
 

@@ -3,5 +3,6 @@
 
 pub mod parser_nodes;
 pub mod constants;
+pub mod constant_ext;
 pub mod parser;
 pub mod detect_expression;

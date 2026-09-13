@@ -3,6 +3,7 @@
 
 mod application;
 mod parser;
+mod tools;
 
 use application::window::*;
 

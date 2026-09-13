@@ -1,43 +1,15 @@
 //Copyright (C) 2026  Senne98
 //Lisence: https://github.com/Senne98/Cycle/blob/main/LICENSE
 
-pub trait CharVecToString {
-    fn to_string_if_valid_f64(&self) -> Option<String>;
-    fn to_string(&self) -> String;
-}
-
-impl CharVecToString for Vec<char> {
-    fn to_string(&self) -> String {
-        self.into_iter().collect()
-    }
-
-    fn to_string_if_valid_f64(&self) -> Option<String> {
-        let text: String = self.to_string();
-        if text.parse::<f64>().is_err() {
-            return None;
-        }
-
-        return Some(text);
-    }
-}
-
-pub trait CharIsLetter {
-    fn is_letter(&self) -> bool;
-}
-
-impl CharIsLetter for char {
-    fn is_letter(&self) -> bool {
-        vec!['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 
-            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'].contains(self)
-    }
-}
-
+use crate::tools::std_ext::*;
+use crate::parser::constant_ext::*;
 
 /*
 *   DETECT EXPRESSIONS ON THE LEFT SIDE OF A STRING
 */
 
 pub fn detect_expression_left(input: String) -> Option<String> {
+    let input = input.remove_whitespaces();
     let mut input_chars = input.chars();
     let mut first_char = input_chars.next();
     let mut left_padding = "".to_string();
@@ -67,6 +39,7 @@ pub fn detect_expression_left(input: String) -> Option<String> {
 }
 
 fn number_left(input: String) -> Option<String> {
+    let input = input.remove_whitespaces();
     let mut input_chars = input.chars();
     let mut expression: Vec<char> = Vec::new();
 
@@ -91,6 +64,7 @@ fn number_left(input: String) -> Option<String> {
 }
 
 fn braces_left(input: String) -> Option<String> {
+    let input = input.remove_whitespaces();
     let mut opened_braces = 1;
     let mut input_chars = input.chars();
     let mut expression: Vec<char> = Vec::new();
@@ -117,106 +91,13 @@ fn braces_left(input: String) -> Option<String> {
 }
 
 pub fn latex_variable_left(input: String) -> Option<String> {
-    let mut expression: String = "\\".to_string();
-
-    let mut trimmed_input = input.clone();
-    trimmed_input = trimmed_input.strip_prefix("\\").unwrap().to_string();
-
-    let Some(name) = &latex_variable_left_name(trimmed_input.clone()) else { return None; };
-
-    trimmed_input = trimmed_input.strip_prefix(name).unwrap().to_string();
-    expression.push_str(name);
-
-    let Some(current_char) = trimmed_input.chars().next() else { return Some(expression); };
-    
-    if !(current_char == '_' || current_char == '^') {
-        return Some(expression);
-    }
-
-    let mut detected_subscript: bool = false;
-    if current_char == '_' {
-        detected_subscript = true;
-    }
-    expression.push(current_char);
-    trimmed_input = trimmed_input.strip_prefix(current_char).unwrap().to_string();
-
-    let Some(script) = &latex_variable_left_script(trimmed_input.clone()) else { return None; };
-    
-    trimmed_input = trimmed_input.strip_prefix(script).unwrap().to_string();
-    expression.push_str(script);
-
-    let Some(current_char) = trimmed_input.chars().next() else { return Some(expression); };
-    
-    if !((detected_subscript && current_char == '^') || (!detected_subscript && current_char == '_')) {
-        return Some(expression);
-    }
-    expression.push(current_char);
-    trimmed_input = trimmed_input.strip_prefix(current_char).unwrap().to_string();
-
-    let Some(script) = &latex_variable_left_script(trimmed_input.clone()) else { return None; };
-
-    expression.push_str(script);
-
-    return Some(expression);
-}
-
-fn latex_variable_left_name(input: String) -> Option<String> { 
-    let mut input_chars = input.chars();
-    let mut expression: Vec<char> = Vec::new();
-
-    let current_char_wraped = input_chars.next();
-    if current_char_wraped == None || !current_char_wraped.unwrap().is_letter() {
-        return None;
-    }
-    let mut current_char = current_char_wraped.unwrap();
-
-    while current_char.is_letter() {
-        expression.push(current_char);
-        let current_char_wraped = input_chars.next();
-        if current_char_wraped == None {
-            return Some(expression.to_string());
-        }
-        current_char = current_char_wraped.unwrap();
-    }
-
-    return Some(expression.to_string());
-}
-
-fn latex_variable_left_script(input: String) -> Option<String> {
-    let mut input_chars = input.chars();
-    let mut expression: Vec<char> = Vec::new();
-
-    let current_char_wraped = input_chars.next();
-    if current_char_wraped.is_none() || current_char_wraped.unwrap() != '{' {
-        return None;
-    }
-    expression.push('{');
-
-    let current_char_wraped = input_chars.next();
-    if current_char_wraped == None {
-        return None;
-    }
-    let mut current_char = current_char_wraped.unwrap();
-
-    while current_char.is_letter() || current_char.is_digit(10) {
-        expression.push(current_char);
-        let current_char_wraped = input_chars.next();
-        if current_char_wraped == None {
-            return None;
-        }
-        current_char = current_char_wraped.unwrap();
-    }
-
-    if current_char != '}' {
-        return None;
-    }
-    expression.push(current_char);
-
-    return Some(expression.to_string());
+    let input = input.remove_whitespaces();
+    input.get_valid_constant_left()
 }
 
 //checks for operators such as sqrt, or single char variable
 fn check_operators_left(input: String) -> Option<String> {
+    let input = input.remove_whitespaces();
     let mut input_chars = input.chars();
 
     let current_char_wraped = input_chars.next();
@@ -229,10 +110,10 @@ fn check_operators_left(input: String) -> Option<String> {
         return None;
     }
 
-    let current_char_wraped = input_chars.next();
+    /*let current_char_wraped = input_chars.next();
     if current_char_wraped.is_none() || current_char_wraped.unwrap() == ' ' {
         return Some(first_char.to_string());
-    }
+    }*/
     
     if input.starts_with("sqrt(") {
         let expression = braces_left(input.strip_prefix("sqrt").unwrap().to_string());
@@ -274,7 +155,7 @@ fn check_operators_left(input: String) -> Option<String> {
         return Some(result);
     }
 
-    return None;
+    return input.get_valid_constant_left();
 }
 
 /*
@@ -283,6 +164,7 @@ fn check_operators_left(input: String) -> Option<String> {
 
 
 pub fn detect_expression_right(input: String) -> Option<String> {
+    let input = input.remove_whitespaces();
     let mut input_chars = input.chars();
     let mut first_char = input_chars.next_back();
     let mut right_padding = "".to_string();
@@ -373,14 +255,14 @@ mod tests {
 
     #[test]
     fn test_detect_expression_left() {
-        assert_eq!(detect_expression_left(" 10.0".to_string()), Some(" 10.0".to_string()));
+        assert_eq!(detect_expression_left(" 10.0".to_string()), Some("10.0".to_string()));
         assert_eq!(detect_expression_left("-10.0".to_string()), Some("-10.0".to_string()));
-        assert_eq!(detect_expression_left("(5 * 10 + 3)".to_string()), Some("(5 * 10 + 3)".to_string()));
+        assert_eq!(detect_expression_left("(5 * 10 + 3)".to_string()), Some("(5*10+3)".to_string()));
         assert_eq!(detect_expression_left("\\test_{5}".to_string()), Some("\\test_{5}".to_string()));
 
         assert_eq!(detect_expression_left("10.0 + (5 * \\test)".to_string()), Some("10.0".to_string()));
         assert_eq!(detect_expression_left("-10.0 * sqrt(5)".to_string()), Some("-10.0".to_string()));
-        assert_eq!(detect_expression_left("(5 * 10 + 3) \u{0} 1.3".to_string()), Some("(5 * 10 + 3)".to_string()));
+        assert_eq!(detect_expression_left("(5 * 10 + 3) \u{0} 1.3".to_string()), Some("(5*10+3)".to_string()));
         assert_eq!(detect_expression_left("\\test_{5} + 2".to_string()), Some("\\test_{5}".to_string()));
 
         assert_eq!(detect_expression_left("1.0. + 2".to_string()), None);
@@ -398,7 +280,7 @@ mod tests {
         assert_eq!(number_left("10.0(sdfssd)".to_string()), Some("10.0".to_string()));
         assert_eq!(number_left("10.0(10)".to_string()), Some("10.0".to_string()));
         assert_eq!(number_left("-10.0".to_string()), Some("-10.0".to_string()));
-        assert_eq!(number_left("10.0 5".to_string()), Some("10.0".to_string()));
+        assert_eq!(number_left("10.0 5".to_string()), Some("10.05".to_string()));
         assert_eq!(number_left("10.0abd".to_string()), Some("10.0".to_string()));
         assert_eq!(number_left("10.0+".to_string()), Some("10.0".to_string()));
         assert_eq!(number_left("10.0-".to_string()), Some("10.0".to_string()));
@@ -410,11 +292,11 @@ mod tests {
 
     #[test]
     fn test_braces_left() {
-        assert_eq!(braces_left("(10 * 5)".to_string()), Some("(10 * 5)".to_string()));
-        assert_eq!(braces_left("(10 * 5) + 3".to_string()), Some("(10 * 5)".to_string()));
-        assert_eq!(braces_left("(10 * 5)\\latex".to_string()), Some("(10 * 5)".to_string()));
-        assert_eq!(braces_left("(10 * (5))".to_string()), Some("(10 * (5))".to_string()));
-        assert_eq!(braces_left("(10 * (3 + 5 -10.5)) + (8*3)".to_string()), Some("(10 * (3 + 5 -10.5))".to_string()));
+        assert_eq!(braces_left("(10 * 5)".to_string()), Some("(10*5)".to_string()));
+        assert_eq!(braces_left("(10 * 5) + 3".to_string()), Some("(10*5)".to_string()));
+        assert_eq!(braces_left("(10 * 5)\\latex".to_string()), Some("(10*5)".to_string()));
+        assert_eq!(braces_left("(10 * (5))".to_string()), Some("(10*(5))".to_string()));
+        assert_eq!(braces_left("(10 * (3 + 5 -10.5)) + (8*3)".to_string()), Some("(10*(3+5-10.5))".to_string()));
         assert_eq!(braces_left("(1 + 3 + (5) ".to_string()), None);
         assert_eq!(braces_left("(".to_string()), None);
     }
@@ -426,44 +308,16 @@ mod tests {
         assert_eq!(latex_variable_left("\\abcd^{1a}_{2b}".to_string()), Some("\\abcd^{1a}_{2b}".to_string()));
         assert_eq!(latex_variable_left("\\abcd_{1a}".to_string()), Some("\\abcd_{1a}".to_string()));
         assert_eq!(latex_variable_left("\\abcd^{2b}".to_string()), Some("\\abcd^{2b}".to_string()));
-        assert_eq!(latex_variable_left("\\abcd ad".to_string()), Some("\\abcd".to_string()));
         assert_eq!(latex_variable_left("\\abcd^{1a}_{2b} abcd".to_string()), Some("\\abcd^{1a}_{2b}".to_string()));
         assert_eq!(latex_variable_left("\\abcd_{1a} abcd".to_string()), Some("\\abcd_{1a}".to_string()));
         assert_eq!(latex_variable_left("\\abcd^{2b} abcd".to_string()), Some("\\abcd^{2b}".to_string()));
-        assert_eq!(latex_variable_left("\\abcd01".to_string()), Some("\\abcd".to_string()));
+        assert_eq!(latex_variable_left("\\abcd01".to_string()), None);
         assert_eq!(latex_variable_left("\\abcd^{1a}_{2b}abcd".to_string()), Some("\\abcd^{1a}_{2b}".to_string()));
         assert_eq!(latex_variable_left("\\abcd_{1a}abcd".to_string()), Some("\\abcd_{1a}".to_string()));
         assert_eq!(latex_variable_left("\\abcd^{2b}abcd".to_string()), Some("\\abcd^{2b}".to_string()));
-        assert_eq!(latex_variable_left("\\abcd^{.2b}_{01a}".to_string()), None);
-        assert_eq!(latex_variable_left("\\abcd^{2b}_{01.a}".to_string()), None);
-        assert_eq!(latex_variable_left("\\abcd01_{1a}^{2b}".to_string()), Some("\\abcd".to_string()));
-    }
-
-    #[test]
-    fn test_latex_variable_left_name() {
-        assert_eq!(latex_variable_left_name("abcd".to_string()), Some("abcd".to_string()));
-        assert_eq!(latex_variable_left_name("ABCD".to_string()), Some("ABCD".to_string()));
-        assert_eq!(latex_variable_left_name("abcd abcd".to_string()), Some("abcd".to_string()));
-        assert_eq!(latex_variable_left_name("abcd_{xyz}".to_string()), Some("abcd".to_string()));
-        assert_eq!(latex_variable_left_name("abcd^{xyz}".to_string()), Some("abcd".to_string()));
-        assert_eq!(latex_variable_left_name("abcd0123".to_string()), Some("abcd".to_string()));
-        assert_eq!(latex_variable_left_name("abcd.".to_string()), Some("abcd".to_string()));
-        assert_eq!(latex_variable_left_name("".to_string()), None);
-        assert_eq!(latex_variable_left_name("01a".to_string()), None);
-        assert_eq!(latex_variable_left_name(".a".to_string()), None);
-    }
-
-    #[test]
-    fn test_latex_variable_left_script() {
-        assert_eq!(latex_variable_left_script("{abc}".to_string()), Some("{abc}".to_string()));
-        assert_eq!(latex_variable_left_script("{123}".to_string()), Some("{123}".to_string()));
-        assert_eq!(latex_variable_left_script("{a1b2c3}".to_string()), Some("{a1b2c3}".to_string()));
-        assert_eq!(latex_variable_left_script("{a1b2c3} djhflshdq".to_string()), Some("{a1b2c3}".to_string()));
-        assert_eq!(latex_variable_left_script("{a1b2c3}djhflshdq".to_string()), Some("{a1b2c3}".to_string()));
-        assert_eq!(latex_variable_left_script("{a1b2c3".to_string()), None);
-        assert_eq!(latex_variable_left_script("a{1b2c3}".to_string()), None);
-        assert_eq!(latex_variable_left_script("a1b2c3djhflshdq".to_string()), None);
-        assert_eq!(latex_variable_left_script("{a1b2c3.}".to_string()), None);
+        assert_eq!(latex_variable_left("\\abcd^{.2b}_{01a}".to_string()), Some("\\abcd".to_string()));
+        assert_eq!(latex_variable_left("\\abcd^{2b}_{01.a}".to_string()), Some("\\abcd^{2b}".to_string()));
+        assert_eq!(latex_variable_left("\\abcd01_{1a}^{2b}".to_string()), None);
     }
 
     #[test]
@@ -478,25 +332,30 @@ mod tests {
         assert_eq!(check_operators_left(".aaz ".to_string()), None);
         assert_eq!(check_operators_left("011245a ".to_string()), None);
 
+        assert_eq!(latex_variable_left("abcd".to_string()), Some("a".to_string()));
+        assert_eq!(latex_variable_left("a_{1a}^{2b}".to_string()), Some("a_{1a}^{2b}".to_string()));
+        assert_eq!(latex_variable_left("a^{1a}_{2b}".to_string()), Some("a^{1a}_{2b}".to_string()));
+        assert_eq!(latex_variable_left("a_{1a}".to_string()), Some("a_{1a}".to_string()));
+        assert_eq!(latex_variable_left("a^{2b}".to_string()), Some("a^{2b}".to_string()));
+        assert_eq!(latex_variable_left("a^{1a}_{2b} abcd".to_string()), Some("a^{1a}_{2b}".to_string()));
+        assert_eq!(latex_variable_left("a_{1a} abcd".to_string()), Some("a_{1a}".to_string()));
+        assert_eq!(latex_variable_left("a^{2b} abcd".to_string()), Some("a^{2b}".to_string()));
+
         //sqrt
         assert_eq!(check_operators_left("sqrt()".to_string()), Some("sqrt()".to_string()));
-        assert_eq!(check_operators_left("sqrt(10 * 5)".to_string()), Some("sqrt(10 * 5)".to_string()));
+        assert_eq!(check_operators_left("sqrt(10 * 5)".to_string()), Some("sqrt(10*5)".to_string()));
         assert_eq!(check_operators_left("sqrt(5)abcd ".to_string()), Some("sqrt(5)".to_string()));
         assert_eq!(check_operators_left("sqrt(( 10)".to_string()), None);
-        assert_eq!(check_operators_left("sqrt".to_string()), None);
-        
-        //general false
-        assert_eq!(check_operators_left("test".to_string()), None);
     }
 
     #[test]
     fn test_detect_expression_right() {
-        assert_eq!(detect_expression_right("(10 * 5)".to_string()), Some("(10 * 5)".to_string()));
-        assert_eq!(detect_expression_right("(10 * 5) + 3".to_string()), Some(" 3".to_string()));
-        assert_eq!(detect_expression_right("(10 * 5) + \\latex ".to_string()), Some(" \\latex ".to_string()));
-        assert_eq!(detect_expression_right("(10 * (5))".to_string()), Some("(10 * (5))".to_string()));
-        assert_eq!(detect_expression_right("(10 * (3 + 5 -10.5)) + (8*3)".to_string()), Some(" (8*3)".to_string()));
-        assert_eq!(detect_expression_right("1+ sqrt(5)".to_string()), Some(" sqrt(5)".to_string()));
+        assert_eq!(detect_expression_right("(10 * 5)".to_string()), Some("(10*5)".to_string()));
+        assert_eq!(detect_expression_right("(10 * 5) + 3".to_string()), Some("3".to_string()));
+        assert_eq!(detect_expression_right("(10 * 5) + \\latex ".to_string()), Some("\\latex".to_string()));
+        assert_eq!(detect_expression_right("(10 * (5))".to_string()), Some("(10*(5))".to_string()));
+        assert_eq!(detect_expression_right("(10 * (3 + 5 -10.5)) + (8*3)".to_string()), Some("(8*3)".to_string()));
+        assert_eq!(detect_expression_right("1+ sqrt(5)".to_string()), Some("sqrt(5)".to_string()));
         assert_eq!(detect_expression_right("(10.0^(2".to_string()), Some("2".to_string()));
         assert_eq!(detect_expression_right("(".to_string()), Some("".to_string()));
 

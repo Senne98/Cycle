@@ -4,6 +4,7 @@
 use crate::application::window::*;
 
 use crate::parser::constants::*;
+use crate::parser::constant_ext::ValidateConstants;
 
 use adw;
 use adw::prelude::*;
@@ -234,7 +235,7 @@ fn confirm_action(dialog: &Dialog, latex_field: &EntryRow, name_field: &EntryRow
         banner.set_title("All fields must be filled!");
         banner.set_revealed(true);
     } else if value.contains(" ") {
-        banner.set_title("Name can not contain spaces!");
+        banner.set_title("Value can not contain spaces!");
         banner.set_revealed(true);
     } else if latex.contains(" ") {
         banner.set_title("Latex symbol can not contain spaces!");
@@ -242,24 +243,11 @@ fn confirm_action(dialog: &Dialog, latex_field: &EntryRow, name_field: &EntryRow
     } else if display.contains(" ") {
         banner.set_title("Display symbol can not contain spaces!");
         banner.set_revealed(true);
-    } else if !latex.starts_with("\\") {
-        banner.set_title("Latex symbol should start with \"\\\" !");
-        println!("{}", latex);
-        banner.set_revealed(true);
     } else if !value.parse::<f64>().is_ok() {
         banner.set_title("Value should be a number!");
         banner.set_revealed(true);
-     }else if latex.strip_prefix("\\").unwrap() == "" {
-        banner.set_title("Latex symbol can not be \"\\\"!");
-        banner.set_revealed(true);
-    } else if latex.strip_prefix("\\").unwrap().contains("\\") {
-        banner.set_title("Latex symbol should only contain \"\\\" at the start!");
-        banner.set_revealed(true);
-    } else if latex.strip_prefix("\\").unwrap().contains(&['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']) {
-        banner.set_title("Latex symbol can not contain numbers!");
-        banner.set_revealed(true);
-    } else if latex.strip_prefix("\\").unwrap().contains(&['.', '*', '/', '+', '-', '\"', '\'', '!']) {
-        banner.set_title("Latex symbol can not contain . , * , \" , \' , / , + , - or !");
+    } else if !latex.is_valid_constant() {
+        banner.set_title("Latex symbol is not valid!");
         banner.set_revealed(true);
     } else if is_constant(&latex) {
         banner.set_title("A constant with this Latex symbol already exists!");

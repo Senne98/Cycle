@@ -5,7 +5,8 @@ use crate::parser::parser_nodes::Node;
 use crate::parser::parser_nodes::*;
 
 use crate::parser::detect_expression::*;
-use crate::parser::detect_expression::CharIsLetter;
+use crate::tools::std_ext::*;
+use crate::parser::constant_ext::ValidateConstants;
 
 use std::boxed::Box;
 
@@ -63,6 +64,7 @@ fn add_braces(input: String) -> Option<String> {
 }
 
 fn add_braces_for_symbol(input: String, symbols: &[char]) -> Option<String> {
+    let input = input.remove_whitespaces();
     let Some((left_temp, right_temp)) = input.split_once(symbols) else {
         return Some(input);
     };
@@ -106,6 +108,7 @@ fn add_braces_for_symbol(input: String, symbols: &[char]) -> Option<String> {
 */
 
 fn build_tree(expression: String) -> Option<Box<dyn Node>> {
+    let expression = expression.remove_whitespaces();
     if expression == "" {
         return None;
     }
@@ -196,7 +199,7 @@ fn get_other_node(expression: String) -> Option<Box<dyn Node>> {
         return None;
     }
 
-    if expression.len() == 1 {
+    if expression.is_valid_constant() {
         return Some(Box::new(VariableNode::new(expression)));
     }
 
@@ -230,7 +233,7 @@ fn get_other_node(expression: String) -> Option<Box<dyn Node>> {
 fn get_variable_node_latex(expression: String) -> Option<Box<dyn Node>> {
     let expression = expression.trim().to_string();
 
-    let Some(latex) = latex_variable_left(expression.clone()) else { return None; };
+    let Some(latex) = expression.clone().get_valid_constant_left() else { return None; };
 
     if latex != expression {
         return None;
@@ -254,23 +257,23 @@ mod tests {
     
     #[test]
     fn test_add_braces() {
-        assert_eq!(add_braces("2 + 3".to_string()), Some("(2 + 3)".to_string()));
-        assert_eq!(add_braces("2 \u{0} 3".to_string()), Some("(2 \u{0} 3)".to_string()));
-        assert_eq!(add_braces("2 * 3".to_string()), Some("(2 * 3)".to_string()));
-        assert_eq!(add_braces("2 / 3".to_string()), Some("(2 / 3)".to_string()));
-        assert_eq!(add_braces("2 ^ 3".to_string()), Some("(2 ^ 3)".to_string()));
-        assert_eq!(add_braces("2^3 + 5 * 8 \u{0} 0.05 / 3.25".to_string()), Some("(((2^3) +( 5 * 8)) \u{0}( 0.05 / 3.25))".to_string()));
-        assert_eq!(add_braces("5 *0.3 \u{0} 8^(5-0.3) * exp(5)".to_string()), Some("((5 *0.3) \u{0}(( 8^(5-0.3)) * exp(5)))".to_string()));
-        assert_eq!(add_braces("(5 + 3 \u{0} exp(8 * (3 \u{0} 5))) / sqrt(2) + \\latex_{5a} ^-3.9".to_string()).unwrap().replace(" ", ""), "(((((5 + 3) \u{0} exp((8 * ((3 \u{0} 5)))))) / sqrt(2)) + (\\latex_{5a} ^-3.9))".replace(" ", ""));
+        assert_eq!(add_braces("2 + 3".to_string()), Some("(2+3)".to_string()));
+        assert_eq!(add_braces("2 \u{0} 3".to_string()), Some("(2\u{0}3)".to_string()));
+        assert_eq!(add_braces("2 * 3".to_string()), Some("(2*3)".to_string()));
+        assert_eq!(add_braces("2 / 3".to_string()), Some("(2/3)".to_string()));
+        assert_eq!(add_braces("2 ^ 3".to_string()), Some("(2^3)".to_string()));
+        assert_eq!(add_braces("2^3 + 5 * 8 \u{0} 0.05 / 3.25".to_string()), Some("(((2^3)+(5*8))\u{0}(0.05/3.25))".to_string()));
+        assert_eq!(add_braces("5 *0.3 \u{0} 8^(5-0.3) * exp(5)".to_string()), Some("((5*0.3)\u{0}((8^(5-0.3))*exp(5)))".to_string()));
+        assert_eq!(add_braces("(5 + 3 \u{0} exp(8 * (3 \u{0} 5))) / sqrt(2) + \\latex_{5a} ^-3.9".to_string()).unwrap().replace(" ", ""), "(((((5+3)\u{0}exp((8*((3\u{0}5))))))/sqrt(2))+(\\latex_{5a}^-3.9))".replace(" ", ""));
     }
 
     #[test]
     fn test_add_braces_for_symbol() {
-        assert_eq!(add_braces_for_symbol("10.0^2 + 3".to_string(), &['^']), Some("(10.0^2) + 3".to_string()));
-        assert_eq!(add_braces_for_symbol("10.0^(2 + 3)".to_string(), &['^']), Some("(10.0^(2 + 3))".to_string()));
+        assert_eq!(add_braces_for_symbol("10.0^2 + 3".to_string(), &['^']), Some("(10.0^2)+3".to_string()));
+        assert_eq!(add_braces_for_symbol("10.0^(2 + 3)".to_string(), &['^']), Some("(10.0^(2+3))".to_string()));
         assert_eq!(add_braces_for_symbol("10.0^2^3".to_string(), &['^']), Some("((10.0^2)^3)".to_string()));
         assert_eq!(add_braces_for_symbol("10.0^(2^3)".to_string(), &['^']), Some("(10.0^((2^3)))".to_string()));
-        assert_eq!(add_braces_for_symbol("10.0^(2 + 5^3)".to_string(), &['^']), Some("(10.0^(2 +( 5^3)))".to_string()));
+        assert_eq!(add_braces_for_symbol("10.0^(2 + 5^3)".to_string(), &['^']), Some("(10.0^(2+(5^3)))".to_string()));
     }
 
     #[test]
@@ -278,6 +281,7 @@ mod tests {
         assert_eq!(build_tree("(5+3.9)".to_string()).unwrap().to_string(), AdditionNode::new(
             Box::new(ValueNode::new(5.0)), 
             Box::new(ValueNode::new(3.9))).to_string());
+        assert_eq!(build_tree("(n_{0})".to_string()).unwrap().to_string(), VariableNode::new("n_{0}".to_string()).to_string());
         assert_eq!(build_tree("(5\u{0}3.9)".to_string()).unwrap().to_string(), SubtractionNode::new(
             Box::new(ValueNode::new(5.0)), 
             Box::new(ValueNode::new(3.9))).to_string());
@@ -356,12 +360,13 @@ mod tests {
                 Box::new(ValueNode::new(3.0)),
                 Box::new(ValueNode::new(5.0))
             ))).to_string());
-
+        assert_eq!(build_tree("n_{0}".to_string()).unwrap().to_string(), VariableNode::new("n_{0}".to_string()).to_string());
     }
 
     #[test]
     fn test_get_var_or_single_expression() {
         assert_eq!(get_var_or_single_expression("\\latex_{0}".to_string()).unwrap().to_string(), get_variable_node_latex("\\latex_{0}".to_string()).unwrap().to_string());
+        assert_eq!(get_var_or_single_expression("n_{0}".to_string()).unwrap().to_string(), get_other_node("n_{0}".to_string()).unwrap().to_string());
         assert_eq!(get_var_or_single_expression("e".to_string()).unwrap().to_string(), get_other_node("e".to_string()).unwrap().to_string());
         assert_eq!(get_var_or_single_expression("sqrt(-5.3)".to_string()).unwrap().to_string(), get_other_node("sqrt(-5.3)".to_string()).unwrap().to_string());
         
@@ -372,6 +377,7 @@ mod tests {
     #[test]
     fn test_get_other_node() {
         assert_eq!(get_other_node(" t".to_string()).unwrap().to_string(), VariableNode::new("t".to_string()).to_string());
+        assert_eq!(get_other_node("n_{0}".to_string()).unwrap().to_string(), VariableNode::new("n_{0}".to_string()).to_string());
         assert_eq!(get_other_node(" sqrt( 5)".to_string()).unwrap().to_string(), SqrtNode::new(Box::new(ValueNode::new(5.0))).to_string());
         assert_eq!(get_other_node(" ln( (5 + 3) )".to_string()).unwrap().to_string(), LnNode::new(Box::new(AdditionNode::new(Box::new(ValueNode::new(5_f64)), Box::new(ValueNode::new(3_f64))))).to_string());
         assert_eq!(get_other_node(" log( 5)".to_string()).unwrap().to_string(), LogNode::new(Box::new(ValueNode::new(5_f64))).to_string());

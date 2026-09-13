@@ -10,8 +10,8 @@ Cycle is a scientific calculator built in Rust with libAdwaita. I created it bec
 "Cycle" sounds a lot like "Sci-Cal", which is short for scientific calculator.
 
 ### To-Do
-  * [ ] Add support for constants in the format `a_{sub}^{super}`
-  * [ ] Fix custom constant creation dialogue
+  * [x] Add support for constants in the format `a_{sub}^{super}`
+  * [x] Fix custom constant creation dialogue
   * [ ] Add more default constants
   * [ ] Add more test cases
 

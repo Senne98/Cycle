@@ -8,3 +8,14 @@ g,Standard Acceleration of Gravity (m⋅s⁻²),g,9.80665
 c,Speed of Light in Vacuum (m⋅s⁻¹),c,299792458
 \varepsylon_{0},Vacuum Electric Permittivity (F⋅m⁻¹),ε₀,8.8541878188e-12
 \mu_{0},Vacuum Magnetic Permeability (N⋅A⁻²),μ₀,1.25663706127e10-6
+N_{A},Avogadro Constant (mol⁻¹),Nₐ,6.02214076e23
+k,Boltzmann Constant (J⋅K⁻¹),k,1.380649e-23
+q_{e},Elementary Charge (C),qₑ,1.602176634e-19
+a_{0},Bohr Radius (m),a₀,5.29177210544e-11
+r_{e},Classical Electron Radius (m),rₑ,2.8179403205e-15
+m_{e},Electron Mass (kg),mₑ,9.1093837139e-31
+m_{p},Proton Mass (kg),mₚ,1.67262192595e-27
+m_{n},Neutron Mass (kg),mₙ,1.67492750056e-27
+\alpha,Fine-Structure Constant,α,7.2973525643e-3
+F,Faraday Constant (C⋅mol⁻¹),F,96485.33212
+\sigma,Stefan-Boltzmann Constant (W⋅m⁻²⋅K⁻⁴),σ,5.670374419e-8
